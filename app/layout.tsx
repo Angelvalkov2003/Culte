@@ -1,0 +1,48 @@
+import type { Metadata, Viewport } from "next";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { siteUrl } from "@/lib/env";
+import "./globals.css";
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+
+const manrope = Manrope({
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()),
+  title: {
+    default: "Culte — груминг салон и козметика за кучета в Пловдив",
+    template: "%s | Culte",
+  },
+  description:
+    "Груминг салон Culte в Пловдив: онлайн запазване на час, внимателна грижа за всяка порода и подбрана козметика за кучета.",
+  applicationName: "Culte",
+  openGraph: {
+    type: "website",
+    locale: "bg_BG",
+    siteName: "Culte",
+  },
+  alternates: { canonical: "/" },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#FAF6EF",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="bg" className={`${cormorant.variable} ${manrope.variable}`}>
+      <body className="min-h-dvh">{children}</body>
+    </html>
+  );
+}
