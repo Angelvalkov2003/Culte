@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createBooking } from "@/app/(site)/booking/actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
@@ -10,6 +10,7 @@ import { cn, formatDuration, formatEUR, formatMinutes, formatRange } from "@/lib
 import { PRICE_NOTE, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type Service, type ServiceGroup } from "@/lib/types";
 import { isRangePrice, serviceDeposit } from "@/lib/booking/deposit";
 import { BookingCalendar } from "@/components/booking/booking-calendar";
+import { revealFirstError, scrollToTop } from "@/lib/scroll";
 
 const STEPS = ["Размер", "Услуги", "Дата и час", "Вашите данни", "Плащане"];
 
@@ -56,6 +57,18 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const slotsRef = useRef<HTMLDivElement>(null);
+  const firstRender = useRef(true);
+
+  // Всяка смяна на стъпка → към началото на формата (на телефон бутонът „Продължи“ е долу до футъра).
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    scrollToTop(rootRef.current, true);
+  }, [step]);
 
   const sized = useMemo(() => services.filter((s) => s.size === size), [services, size]);
   const mains = sized.filter((s) => !s.is_addon);
@@ -140,6 +153,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
         return;
       }
       setSubmitError(res.error);
+      revealFirstError(rootRef.current);
       if (res.fieldErrors) {
         setErrors(res.fieldErrors);
         if (["name", "email", "phone", "dogName", "dogBreed", "terms"].some((k) => res.fieldErrors?.[k])) setStep(3);
@@ -155,7 +169,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
 
   return (
     <div className="grid gap-10 lg:grid-cols-12">
-      <div className="lg:col-span-8">
+      <div ref={rootRef} className="lg:col-span-8">
         <ol className="flex flex-wrap gap-x-6 gap-y-2 border-b border-line pb-4 text-sm" aria-label="Стъпки">
           {STEPS.map((label, i) => (
             <li key={label} aria-current={i === step ? "step" : undefined}>
@@ -174,7 +188,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
           ))}
         </ol>
 
-        <div className="mt-8">
+        <div key={step} className="mt-8 animate-rise [animation-duration:450ms]">
           {step === 0 && (
             <fieldset>
               <legend className="font-serif text-3xl">Колко е голямо кучето ви?</legend>
@@ -296,9 +310,13 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                   onSelect={(d) => {
                     setDate(d);
                     setTime(null);
+                    // На телефон часовете са под календара — показваме ги.
+                    if (window.matchMedia("(max-width: 767px)").matches) {
+                      requestAnimationFrame(() => slotsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+                    }
                   }}
                 />
-                <div aria-live="polite">
+                <div aria-live="polite" ref={slotsRef} className="scroll-mt-24">
                   {!date ? (
                     <p className="text-[15px] text-espresso-soft">
                       {loadingSlots ? "Зареждаме свободните часове…" : "Изберете ден от календара."}
@@ -339,6 +357,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
               onSubmit={(e) => {
                 e.preventDefault();
                 if (validateForm()) setStep(4);
+                else revealFirstError(rootRef.current);
               }}
               className="space-y-5"
               id="details-form"

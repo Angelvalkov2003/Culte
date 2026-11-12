@@ -54,7 +54,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   return (
     <div className="container-page pt-12">
       <header className="grid items-end gap-6 border-b border-espresso/15 md:grid-cols-12">
-        <h1 className="pb-6 text-[clamp(2.6rem,6vw,4.4rem)] md:col-span-6">{active ? active.name : "Козметика за кучета"}</h1>
+        <h1 className="animate-rise pb-6 text-[clamp(2.6rem,6vw,4.4rem)] md:col-span-6">{active ? active.name : "Козметика за кучета"}</h1>
         <p className="pb-6 text-[15px] leading-7 text-espresso-soft md:col-span-3">
           {active?.description ||
             "Продуктите, с които работим в салона, подбрани за домашна грижа между две посещения."}

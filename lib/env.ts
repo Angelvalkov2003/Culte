@@ -1,4 +1,6 @@
 import "server-only";
+import { headers } from "next/headers";
+import { baseSiteUrl } from "@/lib/site-url";
 
 function read(name: string): string {
   return process.env[name]?.trim() ?? "";
@@ -29,7 +31,28 @@ export const env = {
 };
 
 export function siteUrl(): string {
-  return (read("NEXT_PUBLIC_SITE_URL") || "http://localhost:3000").replace(/\/$/, "");
+  return baseSiteUrl();
+}
+
+/** Само име на хост (+ порт) — пазим се от подправени заглавки. */
+const HOST_RE = /^[a-z0-9.-]+(:\d{1,5})?$/i;
+
+/**
+ * Адресът, от който е дошла текущата заявка (напр. https://culte-beta.vercel.app или http://localhost:3000).
+ * Ползва се за success/cancel адресите на Stripe, за да връща клиента на същия домейн.
+ * Извън заявка или при невалиден хост → siteUrl().
+ */
+export async function requestOrigin(): Promise<string> {
+  try {
+    const h = await headers();
+    const host = (h.get("x-forwarded-host") ?? h.get("host") ?? "").split(",")[0].trim();
+    if (!HOST_RE.test(host)) return siteUrl();
+    const local = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host) || host.endsWith(".localhost");
+    const proto = (h.get("x-forwarded-proto") ?? "").split(",")[0].trim() || (local ? "http" : "https");
+    return `${proto === "http" ? "http" : "https"}://${host}`;
+  } catch {
+    return siteUrl();
+  }
 }
 
 /** Supabase е конфигуриран (позволява build без ключове). */

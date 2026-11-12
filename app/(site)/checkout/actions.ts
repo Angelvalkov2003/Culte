@@ -6,7 +6,7 @@ import { getCart, writeCart } from "@/lib/shop/cart";
 import { resolveShipping, shippingSelectionSchema, ShippingError, totalMatches } from "@/lib/shipping/resolve";
 import { getOrder, sendOrderPlacedEmails } from "@/lib/shop/orders";
 import { stripe, checkoutExpiry } from "@/lib/stripe";
-import { siteUrl } from "@/lib/env";
+import { requestOrigin } from "@/lib/env";
 import { toCents } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
@@ -117,7 +117,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   try {
     const order = await getOrder(created.id);
     if (!order?.order_items?.length) throw new Error("Празна поръчка");
-    const site = siteUrl();
+    const site = await requestOrigin();
     const session = await stripe().checkout.sessions.create({
       mode: "payment",
       locale: "bg",

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { submitWithdrawal, type WithdrawalResult } from "@/app/(site)/withdrawal/actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { cn } from "@/lib/format";
+import { revealFirstError, scrollToTop } from "@/lib/scroll";
 
 export function WithdrawalForm() {
   const [kind, setKind] = useState<"order" | "booking">("order");
@@ -12,12 +13,19 @@ export function WithdrawalForm() {
   const [step, setStep] = useState<"form" | "confirm">("form");
   const [res, setRes] = useState<WithdrawalResult | null>(null);
   const [pending, start] = useTransition();
+  const ref = useRef<HTMLDivElement>(null);
+  // Потвърждение или грешка → да се вижда на телефон, без ръчно скролване.
+  useEffect(() => {
+    if (!res) return;
+    if (res.ok) scrollToTop(ref.current, true);
+    else revealFirstError(ref.current);
+  }, [res]);
   const errors = res && !res.ok ? (res.fieldErrors ?? {}) : {};
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF({ ...f, [k]: e.target.value });
 
   if (res?.ok) {
     return (
-      <div role="status" className="rounded-lg bg-sand p-6">
+      <div ref={ref} role="status" className="animate-rise rounded-lg bg-sand p-6">
         <p className="font-serif text-2xl">Отказът е получен</p>
         <p className="mt-2 text-[15px] text-espresso-soft">
           Заявление О-{res.number}, получено на {new Date(res.at).toLocaleString("bg-BG", { timeZone: "Europe/Sofia" })}. Запазете
@@ -28,6 +36,7 @@ export function WithdrawalForm() {
   }
 
   return (
+    <div ref={ref}>
     <form
       noValidate
       onSubmit={(e) => {
@@ -83,7 +92,7 @@ export function WithdrawalForm() {
       {step === "form" ? (
         <Button type="submit" size="lg">Отказ от договора тук</Button>
       ) : (
-        <div className="space-y-3 rounded-lg border border-terracotta/40 bg-sand/60 p-5">
+        <div className="animate-rise space-y-3 rounded-lg border border-terracotta/40 bg-sand/60 p-5">
           <p className="text-[15px]">Проверете данните. С натискане на бутона изпращате изявление за отказ от договора.</p>
           <div className="flex flex-wrap gap-3">
             <Button type="submit" size="lg" disabled={pending}>{pending ? "Изпращаме…" : "Потвърдете отказа"}</Button>
@@ -92,5 +101,6 @@ export function WithdrawalForm() {
         </div>
       )}
     </form>
+    </div>
   );
 }

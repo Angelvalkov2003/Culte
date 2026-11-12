@@ -69,7 +69,7 @@ export default async function ProductPage({ params }: Params) {
           />
         </div>
         <div className="md:col-span-5 md:pt-6">
-          <h1 className="text-[clamp(2rem,4vw,3rem)]">{product.name}</h1>
+          <h1 className="animate-rise text-[clamp(2rem,4vw,3rem)]">{product.name}</h1>
           <p className="mt-4 text-2xl tabular-nums">{formatEUR(product.price)}</p>
           <p className={`mt-2 text-sm ${soldOut ? "text-danger" : "text-olive"}`}>
             {soldOut ? "Изчерпан" : product.stock <= 3 ? `Последни ${product.stock} бр.` : "В наличност"}

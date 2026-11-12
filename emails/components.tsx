@@ -1,7 +1,8 @@
 import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from "@react-email/components";
 import type { ReactNode } from "react";
+import { baseSiteUrl } from "@/lib/site-url";
 
-const site = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+const site = baseSiteUrl();
 
 const c = {
   cream: "#FAF6EF",

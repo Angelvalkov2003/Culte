@@ -24,7 +24,7 @@ export default async function GroomingPage() {
     <div className="container-page pt-12">
       <header className="grid gap-8 md:grid-cols-12">
         <div className="md:col-span-7">
-          <h1 className="text-[clamp(2.6rem,6vw,4.4rem)]">Груминг, който кучето ви ще понесе спокойно</h1>
+          <h1 className="animate-rise text-[clamp(2.6rem,6vw,4.4rem)]">Груминг, който кучето ви ще понесе спокойно</h1>
           <p className="prose-culte mt-6">
             {s.team.join(" и ")} работят с всяко куче поотделно, с козметика {s.cosmetics.join(" и ")}. Преди да започнем,
             питаме за навиците и чувствителните места, а след това подстригваме по породата и по начина ви на живот.
@@ -52,7 +52,7 @@ export default async function GroomingPage() {
           const list = services.filter((x) => x.size === size);
           if (!list.length) return null;
           return (
-            <section key={size} aria-labelledby={`size-${size}`} className="grid gap-6 md:grid-cols-12">
+            <section key={size} data-reveal aria-labelledby={`size-${size}`} className="grid gap-6 md:grid-cols-12">
               <h2 id={`size-${size}`} className="text-4xl md:col-span-3">
                 {SIZE_LABEL[size]}
                 <span className="mt-2 block font-sans text-[15px] font-medium text-espresso-soft">{SIZE_HINT[size]}</span>

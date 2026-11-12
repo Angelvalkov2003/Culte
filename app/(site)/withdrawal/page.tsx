@@ -16,7 +16,7 @@ export default async function WithdrawalPage() {
     <div className="container-page pt-12">
       <div className="grid gap-12 md:grid-cols-12">
         <header className="md:col-span-4">
-          <h1 className="text-5xl">Отказ от договор</h1>
+          <h1 className="animate-rise text-5xl">Отказ от договор</h1>
           <p className="mt-4 text-[15px] leading-7 text-espresso-soft">
             Имате право да се откажете от покупка в 14-дневен срок от получаването на продуктите, без да посочвате причина.
             Попълнете формуляра — веднага ще видите номера и часа на заявлението.

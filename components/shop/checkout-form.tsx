@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { placeOrder } from "@/app/(site)/checkout/actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
@@ -9,6 +9,7 @@ import { Checkbox, CheckboxCard } from "@/components/ui/checkbox";
 import { cn, formatEUR, round2 } from "@/lib/format";
 import type { ShippingMethod } from "@/lib/types";
 import { ShippingPicker, type ShippingState } from "@/components/shop/shipping-picker";
+import { revealFirstError } from "@/lib/scroll";
 
 export function CheckoutForm({
   manualMethods,
@@ -29,6 +30,7 @@ export function CheckoutForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const shipping = ship.price;
   const total = round2(subtotal + (shipping ?? 0));
@@ -39,6 +41,7 @@ export function CheckoutForm({
     setError(null);
     if (!ship.selection || shipping == null) {
       setError(ship.error ?? "Изберете начин на доставка и попълнете нужните полета.");
+      revealFirstError(formRef.current);
       return;
     }
     const selection = ship.selection;
@@ -58,6 +61,7 @@ export function CheckoutForm({
       }
       setError(r.error);
       setErrors(r.fieldErrors ?? {});
+      revealFirstError(formRef.current);
     });
   }
 
@@ -65,7 +69,7 @@ export function CheckoutForm({
     setF({ ...f, [k]: e.target.value });
 
   return (
-    <form onSubmit={submit} noValidate className="mt-10 grid gap-10 lg:grid-cols-12">
+    <form ref={formRef} onSubmit={submit} noValidate className="mt-10 grid gap-10 lg:grid-cols-12">
       <div className="space-y-10 lg:col-span-7">
         <fieldset className="space-y-5">
           <legend className="font-serif text-2xl">Данни за контакт</legend>

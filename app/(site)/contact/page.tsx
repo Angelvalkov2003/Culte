@@ -26,7 +26,7 @@ export default async function ContactPage() {
   const tel = s.phone.replace(/\s+/g, "");
   return (
     <div className="container-page pt-12">
-      <h1 className="text-[clamp(2.6rem,6vw,4.4rem)]">Контакти</h1>
+      <h1 className="animate-rise text-[clamp(2.6rem,6vw,4.4rem)]">Контакти</h1>
       <div className="mt-10 grid gap-10 md:grid-cols-12">
         <div className="space-y-8 text-[15px] md:col-span-4">
           <div>

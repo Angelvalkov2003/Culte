@@ -16,7 +16,7 @@ export default async function CartPage() {
 
   return (
     <div className="container-page pt-12">
-      <h1 className="text-5xl">Количка</h1>
+      <h1 className="animate-rise text-5xl">Количка</h1>
       {cart.items.length === 0 ? (
         <div className="group mt-10 grid max-w-3xl items-end gap-8 sm:grid-cols-[220px_1fr]">
           <PopOut dog="blue" tone="sand" className="w-[220px]" sizes="220px" />

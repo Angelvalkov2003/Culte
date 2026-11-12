@@ -18,7 +18,7 @@ export default async function BookingPage() {
     <div className="container-page pt-12 pb-8">
       <header className="flex items-end justify-between gap-8">
         <div className="max-w-2xl">
-          <h1 className="text-[clamp(2.4rem,5vw,3.8rem)]">Запази час за груминг</h1>
+          <h1 className="animate-rise text-[clamp(2.4rem,5vw,3.8rem)]">Запази час за груминг</h1>
           <p className="mt-4 text-[15px] leading-7 text-espresso-soft">
             Работим с едно куче наведнъж, затова всеки час е изцяло ваш. При записване плащате капаро, остатъкът се плаща в
             салона.

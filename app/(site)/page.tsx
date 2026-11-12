@@ -28,12 +28,7 @@ export default async function HomePage() {
         <h1 id="hero-title" className="sr-only">
           Culte — груминг салон и козметика за кучета
         </h1>
-        <p className="max-w-xl animate-rise text-[15px] text-espresso-soft">
-          Груминг салон в Пловдив и подбрана козметика за кучета.{" "}
-          <span className="text-espresso">{s.slogan}.</span>
-        </p>
-
-        <div className="mt-6 grid gap-3 md:grid-cols-2 md:gap-4">
+        <div className="grid gap-3 md:grid-cols-2 md:gap-4">
           <article className="relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-lg bg-sand p-7 pattern pattern-bones sm:min-h-[560px] sm:p-10">
             <div className="relative z-10">
               <p className="text-sm text-olive">Груминг салон</p>
@@ -102,7 +97,7 @@ export default async function HomePage() {
 
       {/* Салонът */}
       <section aria-labelledby="salon-title" className="container-page mt-28 grid gap-12 md:grid-cols-12">
-        <div className="md:col-span-7">
+        <div data-reveal className="md:col-span-7">
           <h2 id="salon-title" className="text-[clamp(2.2rem,4.5vw,3.6rem)] text-espresso">
             Всяко куче получава цялото ни внимание. Буквално.
           </h2>
@@ -112,7 +107,7 @@ export default async function HomePage() {
             кучето ви, а не по шаблон.
           </p>
         </div>
-        <dl className="grid content-end gap-8 text-[15px] md:col-span-4 md:col-start-9">
+        <dl data-reveal className="grid content-end gap-8 text-[15px] [--reveal-delay:120ms] md:col-span-4 md:col-start-9">
           <div>
             <dt className="text-sm text-espresso-soft">Грумъри</dt>
             <dd className="mt-1 font-serif text-2xl">{s.team.join(" и ")}</dd>
@@ -135,7 +130,7 @@ export default async function HomePage() {
 
       {/* Един час в салона — визуален ритъм от изрязани снимки */}
       <section aria-labelledby="ritual-title" className="container-page mt-28">
-        <div className="flex flex-wrap items-end justify-between gap-6">
+        <div data-reveal className="flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="text-sm text-olive">Един час в Culte</p>
             <h2 id="ritual-title" className="mt-3 max-w-[24ch] text-[clamp(2.2rem,4.5vw,3.4rem)]">
@@ -155,7 +150,7 @@ export default async function HomePage() {
               ["shihtzu", "clay", "Финален щрих", "Разресване, последни корекции и съвет за грижа у дома."],
             ] as const
           ).map(([dog, tone, title, text], i) => (
-            <li key={title} className={cn("group", i % 2 === 1 && "lg:mt-12")}>
+            <li key={title} data-reveal className={cn("group", i % 2 === 1 && "lg:mt-12")}>
               <PopOut dog={dog} tone={tone} sizes="(min-width: 1024px) 280px, 45vw" />
               <div className="mt-5 flex items-baseline gap-3 border-t border-espresso/15 pt-4">
                 <span className="font-serif text-xl text-clay tabular-nums">{String(i + 1).padStart(2, "0")}</span>
@@ -170,7 +165,7 @@ export default async function HomePage() {
       {/* Как става записването — реална последователност */}
       <section aria-labelledby="steps-title" className="mt-28 bg-sand py-20 pattern pattern-scatter">
         <div className="container-page grid gap-12 md:grid-cols-12">
-          <div className="md:col-span-4">
+          <div data-reveal className="md:col-span-4">
             <h2 id="steps-title" className="text-4xl">
               Записването отнема две минути
             </h2>
@@ -189,7 +184,7 @@ export default async function HomePage() {
               ["Данни за кучето", "Име, порода и всичко, което трябва да знаем предварително."],
               ["Капаро", "Плащате сигурно с карта. Часът се потвърждава веднага след плащането."],
             ].map(([title, text], i) => (
-              <li key={title} className="border-t border-espresso/15 pt-4">
+              <li key={title} data-reveal className="border-t border-espresso/15 pt-4">
                 <p className="font-serif text-xl text-clay tabular-nums">{i + 1}</p>
                 <h3 className="mt-1 font-sans text-base font-semibold">{title}</h3>
                 <p className="mt-1.5 text-[15px] leading-6 text-espresso-soft">{text}</p>
@@ -202,7 +197,7 @@ export default async function HomePage() {
       {/* Продукти */}
       {featured.length > 0 && (
         <section aria-labelledby="shop-title" className="container-page mt-28">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div data-reveal className="flex flex-wrap items-end justify-between gap-4">
             <h2 id="shop-title" className="max-w-lg text-4xl">
               От рафта в салона до вашата баня
             </h2>

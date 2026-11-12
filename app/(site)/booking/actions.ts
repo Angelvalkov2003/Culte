@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/supabase/admin";
 import { stripe, checkoutExpiry } from "@/lib/stripe";
-import { siteUrl } from "@/lib/env";
+import { requestOrigin } from "@/lib/env";
 import { getSettings } from "@/lib/settings";
 import { expireStaleBookings, isSlotAvailable } from "@/lib/booking/availability";
 import { quote, resolveServices } from "@/lib/booking/services";
@@ -100,7 +100,7 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
       );
     if (sErr) throw new Error(sErr.message);
 
-    const site = siteUrl();
+    const site = await requestOrigin();
     try {
       const session = await stripe().checkout.sessions.create({
         mode: "payment",

@@ -1,3 +1,4 @@
+import { baseSiteUrl } from "@/lib/site-url";
 import type { SiteSettings } from "@/lib/settings";
 import type { BusinessHours, Product } from "@/lib/types";
 
@@ -14,7 +15,7 @@ export function JsonLd({ data }: { data: Record<string, unknown> }) {
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export function localBusinessJsonLd(s: SiteSettings, hours: BusinessHours[]) {
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const site = baseSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "PetGrooming",
