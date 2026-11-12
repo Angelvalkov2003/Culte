@@ -1,10 +1,32 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/format";
 
-export function PageHeader({ title, actions, children }: { title: string; actions?: ReactNode; children?: ReactNode }) {
+export function PageHeader({
+  title,
+  actions,
+  children,
+  back,
+}: {
+  title: string;
+  actions?: ReactNode;
+  children?: ReactNode;
+  /** Стрелка назад към списъка: { href, label } */
+  back?: { href: string; label: string };
+}) {
   return (
     <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
       <div>
+        {back && (
+          <Link
+            href={back.href}
+            className="group mb-3 inline-flex items-center gap-2 rounded-md py-1 pr-2 text-sm text-espresso-soft transition-colors hover:text-terracotta"
+          >
+            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" aria-hidden />
+            {back.label}
+          </Link>
+        )}
         <h1 className="text-4xl">{title}</h1>
         {children && <div className="mt-2 text-sm text-espresso-soft">{children}</div>}
       </div>

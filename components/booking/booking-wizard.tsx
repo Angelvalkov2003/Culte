@@ -5,17 +5,36 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { createBooking } from "@/app/(site)/booking/actions";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn, formatDuration, formatEUR, formatMinutes, formatRange } from "@/lib/format";
-import { SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
+import { PRICE_NOTE, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type Service, type ServiceGroup } from "@/lib/types";
+import { isRangePrice, serviceDeposit } from "@/lib/booking/deposit";
 import { BookingCalendar } from "@/components/booking/booking-calendar";
 
 const STEPS = ["Размер", "Услуги", "Дата и час", "Вашите данни", "Плащане"];
 
-const SIZE_HINT: Record<DogSize, string> = {
-  small: "До около 10 кг — йоркширски териер, малтийска болонка, пудел той",
-  medium: "Около 10–25 кг — кокер шпаньол, бигъл, шнауцер",
-  large: "Над 25 кг — голдън ретривър, хъски, немска овчарка",
+const SIZE_BREEDS: Record<DogSize, string> = {
+  small: "Йоркширски териер, малтезе, чихуахуа, той пудел, померан",
+  medium: "Ши-тцу, бишон, малтипу, кавалер кинг чарлз, мини пудел",
+  large: "Кокер шпаньол, бигъл, голдън ретривър, лабрадор, хъски",
 };
+const GROUPS: ServiceGroup[] = ["package", "single", "care"];
+
+function ServiceInfo({ s }: { s: Service }) {
+  return (
+    <span className="flex-1">
+      <span className="block font-medium">{s.name}</span>
+      {s.description && <span className="mt-0.5 block text-sm text-espresso-soft">{s.description}</span>}
+      {s.includes && (
+        <span className="mt-1.5 block text-sm leading-6">
+          <span className="text-espresso-soft">Включва: </span>
+          {s.includes}
+        </span>
+      )}
+      {s.breeds && <span className="mt-1 block text-[13px] text-espresso-soft">Подходящо за: {s.breeds}</span>}
+    </span>
+  );
+}
 
 interface Availability {
   days: Record<string, string[]>;
@@ -41,7 +60,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
   const sized = useMemo(() => services.filter((s) => s.size === size), [services, size]);
   const mains = sized.filter((s) => !s.is_addon);
   const main = sized.find((s) => s.id === mainId) ?? null;
-  const extras = sized.filter((s) => s.id !== mainId);
+  const extras = sized.filter((s) => s.id !== mainId && (s.is_addon || s.addon_allowed));
   const chosen = useMemo(
     () => (main ? [main, ...addonIds.map((id) => sized.find((s) => s.id === id)).filter((s): s is Service => !!s)] : []),
     [main, addonIds, sized],
@@ -51,8 +70,9 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
     const from = chosen.reduce((s, x) => s + Number(x.price_from), 0);
     const to = chosen.reduce((s, x) => s + Number(x.price_to), 0);
     const duration = chosen.reduce((s, x) => s + x.duration_max, 0);
-    const deposit = Math.round(from * depositPercent) / 100;
-    return { from, to, duration, deposit, restFrom: from - deposit, restTo: to - deposit };
+    const deposit = Math.round(chosen.reduce((s, x) => s + serviceDeposit(x, depositPercent), 0) * 100) / 100;
+    const range = chosen.some(isRangePrice);
+    return { from, to, duration, deposit, range, restFrom: from - deposit, restTo: to - deposit };
   }, [chosen, depositPercent]);
 
   const servicesKey = `${size}|${mainId}|${addonIds.join(",")}`;
@@ -170,8 +190,11 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                       size === s ? "border-terracotta bg-sand" : "border-line bg-white/50 hover:border-clay",
                     )}
                   >
-                    <span className="font-serif text-2xl">{SIZE_LABEL[s]}</span>
-                    <span className="text-sm leading-6 text-espresso-soft">{SIZE_HINT[s]}</span>
+                    <span>
+                      <span className="block font-serif text-2xl">{SIZE_LABEL[s]}</span>
+                      <span className="mt-1 block text-[15px] font-medium">{SIZE_HINT[s]}</span>
+                    </span>
+                    <span className="text-sm leading-6 text-espresso-soft">{SIZE_BREEDS[s]}</span>
                   </button>
                 ))}
               </div>
@@ -180,43 +203,45 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
 
           {step === 1 && size && (
             <div className="space-y-10">
-              <fieldset>
-                <legend className="font-serif text-3xl">Основна услуга</legend>
-                <p className="mt-2 text-[15px] text-espresso-soft">
-                  Цените са ориентировъчни — крайната зависи от козината и се уточнява на място.
-                </p>
-                <div className="mt-6 divide-y divide-line border-y border-line">
-                  {mains.map((s) => (
-                    <label
-                      key={s.id}
-                      className={cn(
-                        "flex cursor-pointer items-start gap-4 px-1 py-4 transition-colors",
-                        mainId === s.id && "bg-sand/60",
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="main"
-                        className="mt-1.5 size-4 accent-terracotta"
-                        checked={mainId === s.id}
-                        onChange={() => {
-                          setMainId(s.id);
-                          setAddonIds((ids) => ids.filter((x) => x !== s.id));
-                          setTime(null);
-                        }}
-                      />
-                      <span className="flex-1">
-                        <span className="block font-medium">{s.name}</span>
-                        {s.description && <span className="mt-0.5 block text-sm text-espresso-soft">{s.description}</span>}
-                      </span>
-                      <span className="text-right text-sm">
-                        <span className="block tabular-nums">{formatRange(s.price_from, s.price_to)}</span>
-                        <span className="block text-espresso-soft">{formatDuration(s.duration_min, s.duration_max)}</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              <div>
+                <h2 className="font-serif text-3xl">Изберете услуга</h2>
+                <p className="mt-2 max-w-2xl text-[15px] text-espresso-soft">{PRICE_NOTE}</p>
+              </div>
+              {GROUPS.map((g) => {
+                const list = mains.filter((s) => s.group_name === g);
+                if (!list.length) return null;
+                return (
+                  <fieldset key={g}>
+                    <legend className="font-sans text-sm font-semibold">{SERVICE_GROUP_LABEL[g]}</legend>
+                    <div className="mt-3 divide-y divide-line border-y border-line">
+                      {list.map((s) => (
+                        <label
+                          key={s.id}
+                          className={cn("flex cursor-pointer items-start gap-4 px-1 py-4 transition-colors", mainId === s.id && "bg-sand/60")}
+                        >
+                          <input
+                            type="radio"
+                            name="main"
+                            className="mt-1.5 size-4 accent-terracotta"
+                            checked={mainId === s.id}
+                            onChange={() => {
+                              setMainId(s.id);
+                              setAddonIds((ids) => ids.filter((x) => x !== s.id));
+                              setTime(null);
+                            }}
+                          />
+                          <ServiceInfo s={s} />
+                          <span className="shrink-0 text-right text-sm">
+                            <span className="block tabular-nums">{formatRange(s.price_from, s.price_to)}</span>
+                            <span className="block text-espresso-soft">{formatDuration(s.duration_min, s.duration_max)}</span>
+                            <span className="mt-1 block text-espresso-soft">капаро {formatEUR(serviceDeposit(s, depositPercent))}</span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                );
+              })}
 
               {main && extras.length > 0 && (
                 <fieldset>
@@ -328,7 +353,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                   <Input id="phone" type="tel" autoComplete="tel" value={form.phone} aria-invalid={!!errors.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })} />
                 </Field>
-                <Field label="Имейл" htmlFor="email" error={errors.email} hint="Тук ще получите потвърждението." className="sm:col-span-2">
+                <Field label="Имейл" htmlFor="email" error={errors.email} className="sm:col-span-2">
                   <Input id="email" type="email" autoComplete="email" value={form.email} aria-invalid={!!errors.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })} />
                 </Field>
@@ -346,16 +371,15 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                 </Field>
               </div>
               <div>
-                <label className="flex items-start gap-3 text-[15px]">
-                  <input type="checkbox" className="mt-1 size-4 accent-terracotta" checked={form.terms}
-                    aria-invalid={!!errors.terms}
-                    onChange={(e) => setForm({ ...form, terms: e.target.checked })} />
-                  <span>
-                    Съгласен/на съм с{" "}
-                    <Link href="/terms" target="_blank" className="link-underline">общите условия</Link> и{" "}
-                    <Link href="/privacy" target="_blank" className="link-underline">политиката за поверителност</Link>.
-                  </span>
-                </label>
+                <Checkbox checked={form.terms} aria-invalid={!!errors.terms}
+                  onChange={(e) => setForm({ ...form, terms: e.target.checked })}>
+                  Съгласен/на съм с{" "}
+                  <Link href="/terms" target="_blank" className="link-underline">общите условия</Link> и{" "}
+                  <Link href="/privacy" target="_blank" className="link-underline">политиката за поверителност</Link>.
+                  Изрично желая услугата да бъде извършена в 14-дневния срок за отказ и разбирам, че след като бъде
+                  изцяло извършена, губя правото си на отказ. До началото на часа мога да откажа резервацията и да получа
+                  капарото обратно.
+                </Checkbox>
                 {errors.terms && <p className="mt-1 text-sm text-danger" role="alert">{errors.terms}</p>}
               </div>
             </form>
@@ -372,12 +396,12 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                 <dt className="text-espresso-soft">Контакт</dt>
                 <dd>{form.name}, {form.phone}, {form.email}</dd>
               </dl>
-              <div className="mt-8 rounded-lg bg-sand p-5 sm:p-6">
+              <div className="mt-8 rounded-lg bg-sand p-5 pattern pattern-bones sm:p-6">
                 <p className="text-[15px]">
-                  Сега плащате <strong className="font-semibold">{formatEUR(totals.deposit)}</strong> — {depositPercent}% от
-                  началната цена. Остатъкът от <span className="tabular-nums">{formatRange(totals.restFrom, totals.restTo)}</span>{" "}
-                  се плаща в салона.
+                  Сега плащате капаро <strong className="font-semibold">{formatEUR(totals.deposit)}</strong>. Остатъкът от{" "}
+                  <span className="tabular-nums">{formatRange(totals.restFrom, totals.restTo)}</span> се плаща в салона.
                 </p>
+                {totals.range && <p className="mt-2 text-sm text-espresso-soft">{PRICE_NOTE}</p>}
                 <p className="mt-2 text-sm text-espresso-soft">
                   Часът се задържа за вас 30 минути, докато завършите плащането. Плащането е през Stripe — данните на картата
                   ви не минават през нас.

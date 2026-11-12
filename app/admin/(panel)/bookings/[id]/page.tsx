@@ -23,6 +23,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
   return (
     <>
       <PageHeader
+        back={{ href: "/admin/bookings", label: "Всички резервации" }}
         title={`${b.dog_name || b.customer_name} · ${fmt(b.start_at, "d MMMM, HH:mm")}`}
         actions={<Link href={`/admin/calendar?date=${fmt(b.start_at, "yyyy-MM-dd")}&view=day`} className="text-sm link-underline">Виж в календара</Link>}
       >

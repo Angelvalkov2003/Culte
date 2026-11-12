@@ -7,6 +7,7 @@ import { PAYMENT_LABEL, type Order } from "@/lib/types";
 import { ButtonLink } from "@/components/ui/button";
 import { ClearCart } from "@/components/shop/clear-cart";
 import { AutoRefresh } from "@/components/site/auto-refresh";
+import { DogCutout } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Поръчката е приета", robots: { index: false } };
@@ -38,7 +39,7 @@ export default async function CheckoutSuccess({
   if (!order) {
     return (
       <Shell title="Не намерихме тази поръчка">
-        <p>Ако сте платили, ще получите имейл с потвърждение.</p>
+        <p>Ако сте платили, обадете ни се и ще проверим поръчката ви.</p>
       </Shell>
     );
   }
@@ -62,7 +63,7 @@ export default async function CheckoutSuccess({
         </p>
       ) : (
         <p>
-          Изпратихме потвърждение на {order.customer_email}. Ще ви пишем отново, когато поръчката тръгне към вас.
+          Запазете номера на поръчката (№ {order.number}) — тази страница е вашето потвърждение. Ще ви се обадим на {order.customer_phone}, ако нещо трябва да уточним.
         </p>
       )}
       <dl className="mt-8 grid max-w-md grid-cols-2 gap-y-2 text-[15px]">
@@ -80,6 +81,7 @@ export default async function CheckoutSuccess({
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="container-page max-w-3xl pt-16">
+      <DogCutout dog="poodleViolet" priority sizes="140px" className="mb-6 w-[140px]" />
       <h1 className="text-5xl">{title}</h1>
       <div className="mt-6 space-y-4 text-[15px] leading-7 text-espresso-soft">{children}</div>
       <div className="mt-10 flex flex-wrap gap-3">

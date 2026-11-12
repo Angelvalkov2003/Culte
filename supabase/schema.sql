@@ -1,8 +1,38 @@
 -- =====================================================================
--- Culte — пълна схема на базата (Supabase / Postgres)
--- Изпълнява се НАВЕДНЪЖ в SQL Editor на празен проект.
--- Всички записи минават през сървъра със service role ключа.
+-- Culte — ФИНАЛЕН SQL (Supabase / Postgres)
+-- ВНИМАНИЕ: ИЗТРИВА ЦЯЛАТА БАЗА НА САЙТА (всички таблици, данни,
+-- функции и типове) и я създава наново със seed данни.
+-- Пуска се целият файл наведнъж в SQL Editor.
 -- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 0. Нулиране
+-- ---------------------------------------------------------------------
+drop table if exists
+  order_items, orders, shipping_methods, products, categories,
+  booking_services, bookings, services, blocked_periods, business_hours,
+  settings, stripe_events, admin_login_attempts, withdrawal_requests
+  cascade;
+
+do $$
+declare r record;
+begin
+  for r in
+    select p.oid::regprocedure as sig
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public'
+      and p.proname in ('set_updated_at', 'expire_stale_bookings', 'order_deduct_stock',
+                        'order_restore_stock', 'create_order', 'cleanup_stale_data')
+  loop
+    execute 'drop function if exists ' || r.sig || ' cascade';
+  end loop;
+end $$;
+
+drop type if exists
+  dog_size, booking_status, booking_source, order_status, payment_method,
+  service_group, delivery_type, withdrawal_kind, withdrawal_status
+  cascade;
+
 
 create extension if not exists btree_gist;
 create extension if not exists pgcrypto;
@@ -15,7 +45,8 @@ create type booking_status as enum ('pending_payment', 'confirmed', 'completed',
 create type booking_source as enum ('online', 'manual');
 create type order_status as enum ('pending_payment', 'new', 'processing', 'shipped', 'delivered', 'cancelled', 'expired', 'stock_issue');
 create type payment_method as enum ('stripe', 'cod');
-create type delivery_type as enum ('address', 'office', 'pickup');
+create type service_group as enum ('package', 'single', 'care');
+create type delivery_type as enum ('address', 'office', 'pickup', 'locker');
 
 -- ---------------------------------------------------------------------
 -- updated_at тригер
@@ -80,6 +111,11 @@ create table services (
   price_from    numeric(10,2) not null check (price_from >= 0),
   price_to      numeric(10,2) not null,
   is_addon      boolean not null default false,  -- само като допълнителна услуга
+  addon_allowed boolean not null default false,  -- може да се добави към основна услуга
+  group_name    service_group not null default 'single',
+  includes      text not null default '',        -- „Включва: …“
+  breeds        text not null default '',        -- примерни породи
+  deposit       numeric(10,2) check (deposit is null or deposit >= 0), -- null = по правилото
   is_active     boolean not null default true,
   sort_order    integer not null default 0,
   created_at    timestamptz not null default now(),
@@ -94,7 +130,8 @@ create trigger services_updated before update on services for each row execute f
 -- ---------------------------------------------------------------------
 create table bookings (
   id                        uuid primary key default gen_random_uuid(),
-  status                    booking_status not null default 'pending_payment',
+  number                    bigint generated always as identity (start with 5001) unique,
+  status                   booking_status not null default 'pending_payment',
   source                    booking_source not null default 'online',
   size                      dog_size not null,
   start_at                  timestamptz not null,
@@ -116,6 +153,8 @@ create table bookings (
   admin_note                text not null default '',
   reminder_sent_at          timestamptz,
   terms_accepted_at         timestamptz,
+  -- Изрично искане услугата да се изпълни в 14-дневния срок за отказ (чл. 55, ал. 3 ЗЗП)
+  service_consent_at        timestamptz,
   created_at                timestamptz not null default now(),
   updated_at                timestamptz not null default now(),
   check (end_at > start_at),
@@ -178,6 +217,9 @@ create table products (
   stock            integer not null default 0 check (stock >= 0),
   is_active        boolean not null default true,
   image_public_id  text,
+  -- Регламент (ЕС) 2023/988 (GPSR): производител/отговорно лице и информация за безопасност
+  manufacturer     text not null default '',
+  safety_info      text not null default '',
   sort_order       integer not null default 0,
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now()
@@ -233,10 +275,17 @@ create table orders (
   tracking_number           text not null default '',
   admin_note                text not null default '',
   shipped_at                timestamptz,
+  refund_id                 text,
+  refunded_at               timestamptz,
+  -- Фактура по желание: {company, eik, vat, address, mol}
+  invoice_requested         boolean not null default false,
+  invoice_details           jsonb not null default '{}'::jsonb,
+  terms_accepted_at         timestamptz,
   created_at                timestamptz not null default now(),
   updated_at                timestamptz not null default now()
 );
 create index orders_status_idx on orders (status, created_at desc);
+create index orders_email_idx on orders (lower(customer_email));
 create trigger orders_updated before update on orders for each row execute function set_updated_at();
 
 create table order_items (
@@ -264,6 +313,32 @@ create table admin_login_attempts (
   created_at  timestamptz not null default now()
 );
 create index admin_login_attempts_ip_idx on admin_login_attempts (ip, created_at desc);
+
+-- ---------------------------------------------------------------------
+-- Отказ от договор (функция за отказ, чл. 11а Директива 2011/83/ЕС,
+-- изм. с Директива (ЕС) 2023/2673 — в сила от 19.06.2026)
+-- ---------------------------------------------------------------------
+create type withdrawal_kind as enum ('order', 'booking');
+create type withdrawal_status as enum ('received', 'processed', 'rejected');
+
+create table withdrawal_requests (
+  id              uuid primary key default gen_random_uuid(),
+  number          bigint generated always as identity (start with 1) unique,
+  kind            withdrawal_kind not null,
+  order_id        uuid references orders(id) on delete set null,
+  booking_id      uuid references bookings(id) on delete set null,
+  reference       text not null,          -- номер на поръчка/резервация, както е въведен
+  customer_name   text not null,
+  customer_email  text not null,
+  items           text not null default '', -- кои продукти (празно = цялата поръчка)
+  reason          text not null default '', -- по желание, не е задължително
+  status          withdrawal_status not null default 'received',
+  admin_note      text not null default '',
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+create index withdrawal_requests_status_idx on withdrawal_requests (status, created_at desc);
+create trigger withdrawal_requests_updated before update on withdrawal_requests for each row execute function set_updated_at();
 
 -- ---------------------------------------------------------------------
 -- Атомарни наличности
@@ -338,56 +413,87 @@ language plpgsql security definer set search_path = public as $$
 declare
   v_order     orders%rowtype;
   v_ship      shipping_methods%rowtype;
+  v_ids       uuid[];
+  v_qtys      integer[];
   v_subtotal  numeric(10,2);
   v_shipping  numeric(10,2);
   v_bad       integer;
 begin
-  if jsonb_array_length(coalesce(p_items, '[]'::jsonb)) = 0 then
+  if jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
     raise exception 'empty_cart';
   end if;
 
   select * into v_ship from shipping_methods where id = p_shipping_method_id and is_active;
   if not found then raise exception 'invalid_shipping'; end if;
 
-  create temp table _items on commit drop as
-    select (e->>'product_id')::uuid as product_id, sum((e->>'quantity')::int) as qty
-      from jsonb_array_elements(p_items) e
-     group by 1;
+  -- Обединяваме повтарящи се продукти, подредени по id (стабилен ред на заключване)
+  select array_agg(pid order by pid), array_agg(qty order by pid)
+    into v_ids, v_qtys
+    from (select (e->>'product_id')::uuid as pid, sum((e->>'quantity')::int)::int as qty
+            from jsonb_array_elements(p_items) e group by 1) x;
 
-  if exists (select 1 from _items where qty <= 0) then raise exception 'invalid_quantity'; end if;
+  if exists (select 1 from unnest(v_qtys) q where q <= 0 or q > 999) then
+    raise exception 'invalid_quantity';
+  end if;
 
-  perform 1 from products where id in (select product_id from _items) order by id for update;
+  perform 1 from products where id = any(v_ids) order by id for update;
 
-  select count(*) into v_bad from _items i
-    left join products p on p.id = i.product_id and p.is_active
+  select count(*) into v_bad
+    from unnest(v_ids, v_qtys) as i(pid, qty)
+    left join products p on p.id = i.pid and p.is_active
    where p.id is null or p.stock < i.qty;
   if v_bad > 0 then raise exception 'insufficient_stock'; end if;
 
   select coalesce(sum(p.price * i.qty), 0) into v_subtotal
-    from _items i join products p on p.id = i.product_id;
+    from unnest(v_ids, v_qtys) as i(pid, qty) join products p on p.id = i.pid;
 
   v_shipping := case when v_ship.free_over is not null and v_subtotal >= v_ship.free_over then 0 else v_ship.price end;
 
   insert into orders (status, payment_method, customer_name, customer_email, customer_phone, city,
                       delivery, address, note, shipping_method_id, shipping_name, shipping_price,
-                      subtotal, total)
+                      subtotal, total, invoice_requested, invoice_details, terms_accepted_at)
   values (case when p_payment_method = 'cod' then 'new'::order_status else 'pending_payment'::order_status end,
           p_payment_method,
-          p_customer->>'name', p_customer->>'email', p_customer->>'phone', p_customer->>'city',
+          p_customer->>'name', p_customer->>'email', p_customer->>'phone', coalesce(p_customer->>'city', ''),
           v_ship.delivery, coalesce(p_customer->>'address', ''), coalesce(p_customer->>'note', ''),
-          v_ship.id, v_ship.name, v_shipping, v_subtotal, v_subtotal + v_shipping)
+          v_ship.id, v_ship.name, v_shipping, v_subtotal, v_subtotal + v_shipping,
+          coalesce((p_customer->>'invoice_requested')::boolean, false),
+          coalesce(p_customer->'invoice_details', '{}'::jsonb),
+          now())
   returning * into v_order;
 
   insert into order_items (order_id, product_id, name, price, quantity)
     select v_order.id, p.id, p.name, p.price, i.qty
-      from _items i join products p on p.id = i.product_id;
+      from unnest(v_ids, v_qtys) as i(pid, qty) join products p on p.id = i.pid;
 
   if p_deduct then
-    update products p set stock = p.stock - i.qty from _items i where p.id = i.product_id;
+    update products p set stock = p.stock - i.qty
+      from unnest(v_ids, v_qtys) as i(pid, qty) where p.id = i.pid;
     update orders set stock_deducted = true where id = v_order.id returning * into v_order;
   end if;
 
   return v_order;
+end $$;
+
+-- Почистване на ненужни лични данни (GDPR, минимизиране). Вика се от дневния cron.
+-- Изтриват се само неплатени/изоставени записи и логовете за вход; платените остават
+-- заради счетоводните срокове.
+create or replace function cleanup_stale_data(p_days integer default 30) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare b integer; o integer; l integer; e integer;
+begin
+  delete from bookings
+   where status = 'expired' and not deposit_paid and created_at < now() - make_interval(days => p_days);
+  get diagnostics b = row_count;
+  delete from orders
+   where status = 'expired' and paid_at is null and not stock_deducted
+     and created_at < now() - make_interval(days => p_days);
+  get diagnostics o = row_count;
+  delete from admin_login_attempts where created_at < now() - make_interval(days => p_days);
+  get diagnostics l = row_count;
+  delete from stripe_events where created_at < now() - make_interval(days => 90);
+  get diagnostics e = row_count;
+  return jsonb_build_object('bookings', b, 'orders', o, 'login_attempts', l, 'stripe_events', e);
 end $$;
 
 -- Функциите са само за сървъра (service role)
@@ -399,6 +505,8 @@ grant execute on function order_deduct_stock(uuid) to service_role;
 grant execute on function order_restore_stock(uuid) to service_role;
 grant execute on function create_order(jsonb, jsonb, uuid, payment_method, boolean) to service_role;
 grant execute on function expire_stale_bookings(integer) to service_role;
+revoke all on function cleanup_stale_data(integer) from public, anon, authenticated;
+grant execute on function cleanup_stale_data(integer) to service_role;
 
 -- ---------------------------------------------------------------------
 -- RLS: публично четене само на активни/публични данни, без публични записи
@@ -416,6 +524,7 @@ alter table orders                enable row level security;
 alter table order_items           enable row level security;
 alter table stripe_events         enable row level security;
 alter table admin_login_attempts  enable row level security;
+alter table withdrawal_requests   enable row level security;
 
 create policy "public read settings"          on settings         for select to anon, authenticated using (is_public);
 create policy "public read business hours"    on business_hours   for select to anon, authenticated using (true);
@@ -424,6 +533,12 @@ create policy "public read categories"        on categories       for select to 
 create policy "public read products"          on products         for select to anon, authenticated using (is_active);
 create policy "public read shipping methods"  on shipping_methods for select to anon, authenticated using (is_active);
 -- Останалите таблици нямат политики → недостъпни без service role.
+
+-- Изрични права (не разчитаме на подразбиращите се в проекта)
+grant usage on schema public to anon, authenticated, service_role;
+grant select on settings, business_hours, services, categories, products, shipping_methods to anon, authenticated;
+grant all on all tables in schema public to service_role;
+grant usage, select on all sequences in schema public to service_role;
 
 -- =====================================================================
 -- SEED
@@ -440,11 +555,18 @@ insert into settings (key, label, value) values
   ('map_url',         'Линк към картата',               '"https://www.google.com/maps/search/?api=1&query=Груминг+салон+Animal+House+Пловдив"'),
   ('team',            'Екип',                           '["Цветелина", "Стефани"]'),
   ('cosmetics',       'Козметика в салона',             '["Artero", "Hydra"]'),
-  ('deposit_percent', 'Капаро (%)',                     '50'),
+  ('deposit_percent', 'Капаро (%) — за услуги без зададено капаро',                     '50'),
   ('slot_step_min',   'Стъпка на часовете (мин)',       '30'),
   ('min_lead_hours',  'Минимум часове напред',          '2'),
   ('max_days_ahead',  'Максимум дни напред',            '60'),
-  ('hold_minutes',    'Задържане на часа за плащане (мин)', '30');
+  ('hold_minutes',    'Задържане на часа за плащане (мин)', '30'),
+  -- Данни за търговеца (ЗЕТ чл. 4, ЗЗП чл. 47) — попълват се от админ панела
+  ('company_name',    'Наименование на търговеца',      '""'),
+  ('company_eik',     'ЕИК',                            '""'),
+  ('company_vat',     'ДДС номер (ако има)',            '""'),
+  ('company_address', 'Седалище и адрес на управление', '""'),
+  ('company_email',   'Имейл за контакт',               '""'),
+  ('vat_registered',  'Регистриран по ДДС',             'true');
 
 insert into business_hours (weekday, is_closed, open_time, close_time) values
   (0, false, '10:00', '16:00'),
@@ -499,6 +621,89 @@ insert into services (size, name, description, duration_min, duration_max, price
   ('large', 'Почистване и грижа за очи',        'Внимателно почистване около очите.',                             10,  10,   5.11,   5.11, true, 120),
   ('large', 'Изрязване на нокти',               'Скъсяване и оформяне на ноктите.',                               10,  10,   5.11,   5.11, true, 130);
 
+-- @@SERVICES_V2_SEED_BEGIN
+-- Групи
+update services set group_name = 'package'
+ where name in ('Цялостен груминг', 'Подстригване и миене', 'Къпане и сушене', 'Спа баня', 'Специална баня');
+update services set group_name = 'single'
+ where name in ('Подстригване', 'Разресване', 'Консултация', 'Курс по грижа за куче');
+update services set group_name = 'care'
+ where name in ('Премахване на зъбна плака', 'Зъбна хигиена', 'Подстригване и почистване на уши',
+                'Почистване и грижа за очи', 'Изрязване на нокти');
+
+-- Какво може да се добави към основна услуга
+update services set addon_allowed = true
+ where name in ('Премахване на зъбна плака', 'Зъбна хигиена', 'Разресване');
+
+-- Ред на показване: пакети → отделни → грижа
+update services set sort_order = case name
+  when 'Цялостен груминг' then 10 when 'Подстригване и миене' then 20 when 'Къпане и сушене' then 30
+  when 'Спа баня' then 40 when 'Специална баня' then 40
+  when 'Подстригване' then 110 when 'Разресване' then 120 when 'Консултация' then 130 when 'Курс по грижа за куче' then 140
+  when 'Премахване на зъбна плака' then 210 when 'Зъбна хигиена' then 220 when 'Подстригване и почистване на уши' then 230
+  when 'Почистване и грижа за очи' then 240 when 'Изрязване на нокти' then 250 else sort_order end;
+
+-- Описания „Включва“ (админът ги редактира)
+update services set
+  description = 'Пълната грижа в една среща — кучето излиза чисто, подстригано и ухаещо.',
+  includes = 'Къпане с шампоан и балсам, изсушаване, подстригване по стандарт на породата или по ваше желание, хигиенна подстрижка, почистване на уши, рязане на нокти, почистване около очите, парфюм.'
+ where name = 'Цялостен груминг';
+update services set
+  description = 'Къпане и подстригване, без допълнителните процедури.',
+  includes = 'Къпане с шампоан и балсам, изсушаване, подстригване по желание. Уши, нокти и очи може да добавите отделно.'
+ where name = 'Подстригване и миене';
+update services set
+  description = 'За кучета, които не се нуждаят от подстригване.',
+  includes = 'Къпане с подходящ шампоан и балсам, изсушаване и разресване. Без подстригване.'
+ where name = 'Къпане и сушене';
+update services set
+  description = 'Подхранваща баня за мека и блестяща козина.',
+  includes = 'Къпане с подхранваща маска, изсушаване и разресване.'
+ where name = 'Спа баня';
+update services set
+  description = 'За гъста, дълга или двойна козина.',
+  includes = 'Дълбоко почистващо къпане, премахване на подкосъма, изсушаване и разресване.'
+ where name = 'Специална баня';
+update services set
+  description = 'Само оформяне на козината, без къпане.',
+  includes = 'Подстригване по стандарт на породата или по ваше желание на чиста и суха козина.'
+ where name = 'Подстригване';
+update services set
+  description = 'Разплитане на възли и премахване на подкосъма.',
+  includes = 'Разресване, премахване на сплъстявания и мъртвия подкосъм.'
+ where name = 'Разресване';
+update services set
+  description = 'Оглед и съвет за грижата у дома.',
+  includes = 'Оглед на козината и кожата, препоръки за козметика и честота на груминга.'
+ where name = 'Консултация';
+update services set
+  description = 'Научете се да поддържате кучето си между посещенията.',
+  includes = 'Практическо показване как да къпете, сушите, разресвате и подрязвате ноктите у дома.'
+ where name = 'Курс по грижа за куче';
+update services set
+  description = 'Почистване на зъбен камък без упойка.',
+  includes = 'Внимателно премахване на зъбната плака и камъка без упойка.'
+ where name = 'Премахване на зъбна плака';
+update services set
+  description = 'Почистване на зъбите за свеж дъх.',
+  includes = 'Почистване на зъбите и венците с подходящи продукти.'
+ where name = 'Зъбна хигиена';
+update services set includes = 'Подстригване на космите в ушите и почистване на ушния канал.' where name = 'Подстригване и почистване на уши';
+update services set includes = 'Почистване и подстригване около очите.' where name = 'Почистване и грижа за очи';
+update services set includes = 'Скъсяване и оформяне на ноктите.' where name = 'Изрязване на нокти';
+
+-- Примерни породи по размер
+update services set breeds = 'Йоркширски териер, малтезе, чихуахуа, той пудел, померан' where size = 'small' and group_name = 'package';
+update services set breeds = 'Ши-тцу, бишон, малтипу, кавалер кинг чарлз, мини шнауцер, мини пудел' where size = 'medium' and group_name = 'package';
+update services set breeds = 'Кокер шпаньол, бигъл, голдън ретривър, лабрадор, хъски, самоед' where size = 'large' and group_name = 'package';
+
+-- Капаро: при точна цена 50%; при диапазон 50% от началната цена, закръглено до 10 € (мин. 10 €)
+update services set deposit = case
+  when price_from = price_to then round(price_from * 0.5, 2)
+  else greatest(10, round(price_from * 0.5 / 10) * 10)
+end;
+-- @@SERVICES_V2_SEED_END
+
 insert into categories (name, slug, description, sort_order) values
   ('Шампоани',         'shampoani',        'Нежно почистване, подбрано според типа козина.',          10),
   ('Балсами и маски',  'balsami-i-maski',  'Мекота, блясък и лесно разресване.',                      20),
@@ -541,7 +746,131 @@ from (values
 ) as p(cat, name, slug, description, price, stock, is_active, sort_order)
 join categories c on c.slug = p.cat;
 
+-- Информация за безопасност (GPSR). Производител по подразбиране = търговецът от настройките.
+update products set safety_info =
+  'Само за външна употреба при кучета. Да се избягва контакт с очите; при контакт изплакнете обилно с вода. При раздразнение спрете употребата. Да се съхранява на място, недостъпно за деца, при стайна температура.'
+ where slug <> 'chetka-estestven-kosam' and slug <> 'metalen-greben';
+update products set safety_info =
+  'Използвайте внимателно, без натиск върху кожата. Не оставяйте кучето без надзор с инструмента. Да се съхранява на място, недостъпно за деца.'
+ where slug in ('chetka-estestven-kosam', 'metalen-greben');
+
 insert into shipping_methods (name, description, provider, delivery, price, free_over, sort_order) values
   ('Доставка до адрес',  'Куриер до посочен адрес, 1–3 работни дни.', 'manual', 'address', 6.90, 60.00, 10),
   ('Доставка до офис',   'Вземане от офис на куриер, 1–3 работни дни.', 'manual', 'office', 4.90, 60.00, 20),
   ('Вземане от салона',  'Вземете поръчката си от салона в Пловдив.',   'manual', 'pickup', 0.00, null, 30);
+
+-- =====================================================================
+-- Доставка: Speedy и BoxNow (= миграция 003)
+-- =====================================================================
+-- @@SHIPPING_V3_BEGIN
+alter table orders
+  add column if not exists shipping_provider      text not null default 'manual',   -- manual | speedy | boxnow
+  add column if not exists shipping_method        text not null default '',         -- speedy_office | speedy_apt | speedy_address | boxnow | pickup
+  add column if not exists shipping_site_id       bigint,                           -- Speedy населено място
+  add column if not exists shipping_site_name     text not null default '',
+  add column if not exists shipping_office_id     bigint,                           -- Speedy офис/автомат
+  add column if not exists shipping_office_name   text not null default '',
+  add column if not exists shipping_deadline      timestamptz,
+  add column if not exists shipping_details       jsonb not null default '{}'::jsonb,
+  add column if not exists speedy_shipment_id     text,
+  add column if not exists speedy_parcel_id       text,
+  add column if not exists speedy_created_at      timestamptz,
+  add column if not exists speedy_last_synced_at  timestamptz,
+  add column if not exists boxnow_locker_id       text,
+  add column if not exists boxnow_locker_name     text not null default '',
+  add column if not exists boxnow_delivery_id     text,
+  add column if not exists boxnow_parcel_id       text,
+  add column if not exists boxnow_created_at      timestamptz;
+
+create index if not exists orders_speedy_sync_idx on orders (speedy_last_synced_at nulls first)
+  where speedy_parcel_id is not null;
+
+-- create_order: цената на доставката идва от сървъра (преизчислена от Speedy/BoxNow),
+-- никога от клиента. p_shipping е jsonb с provider, method, price, name, delivery, IDs.
+drop function if exists create_order(jsonb, jsonb, uuid, payment_method, boolean);
+
+create or replace function create_order(
+  p_customer        jsonb,
+  p_items           jsonb,
+  p_shipping        jsonb,
+  p_payment_method  payment_method,
+  p_deduct          boolean
+) returns orders
+language plpgsql security definer set search_path = public as $$
+declare
+  v_order     orders%rowtype;
+  v_ids       uuid[];
+  v_qtys      integer[];
+  v_subtotal  numeric(10,2);
+  v_shipping  numeric(10,2);
+  v_bad       integer;
+begin
+  if jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then
+    raise exception 'empty_cart';
+  end if;
+  v_shipping := (p_shipping->>'price')::numeric(10,2);
+  if v_shipping is null or v_shipping < 0 then raise exception 'invalid_shipping'; end if;
+
+  select array_agg(pid order by pid), array_agg(qty order by pid)
+    into v_ids, v_qtys
+    from (select (e->>'product_id')::uuid as pid, sum((e->>'quantity')::int)::int as qty
+            from jsonb_array_elements(p_items) e group by 1) x;
+
+  if exists (select 1 from unnest(v_qtys) q where q <= 0 or q > 999) then
+    raise exception 'invalid_quantity';
+  end if;
+
+  perform 1 from products where id = any(v_ids) order by id for update;
+
+  select count(*) into v_bad
+    from unnest(v_ids, v_qtys) as i(pid, qty)
+    left join products p on p.id = i.pid and p.is_active
+   where p.id is null or p.stock < i.qty;
+  if v_bad > 0 then raise exception 'insufficient_stock'; end if;
+
+  select coalesce(sum(p.price * i.qty), 0) into v_subtotal
+    from unnest(v_ids, v_qtys) as i(pid, qty) join products p on p.id = i.pid;
+
+  insert into orders (status, payment_method, customer_name, customer_email, customer_phone, city,
+                      delivery, address, note, shipping_method_id, shipping_name, shipping_price,
+                      subtotal, total, invoice_requested, invoice_details, terms_accepted_at,
+                      shipping_provider, shipping_method, shipping_site_id, shipping_site_name,
+                      shipping_office_id, shipping_office_name, shipping_deadline, shipping_details,
+                      boxnow_locker_id, boxnow_locker_name)
+  values (case when p_payment_method = 'cod' then 'new'::order_status else 'pending_payment'::order_status end,
+          p_payment_method,
+          p_customer->>'name', p_customer->>'email', p_customer->>'phone', coalesce(p_customer->>'city', ''),
+          coalesce(p_shipping->>'delivery', 'address')::delivery_type,
+          coalesce(p_customer->>'address', ''), coalesce(p_customer->>'note', ''),
+          nullif(p_shipping->>'method_id', '')::uuid,
+          coalesce(p_shipping->>'name', ''), v_shipping, v_subtotal, v_subtotal + v_shipping,
+          coalesce((p_customer->>'invoice_requested')::boolean, false),
+          coalesce(p_customer->'invoice_details', '{}'::jsonb),
+          now(),
+          coalesce(p_shipping->>'provider', 'manual'), coalesce(p_shipping->>'method', ''),
+          nullif(p_shipping->>'site_id', '')::bigint, coalesce(p_shipping->>'site_name', ''),
+          nullif(p_shipping->>'office_id', '')::bigint, coalesce(p_shipping->>'office_name', ''),
+          nullif(p_shipping->>'deadline', '')::timestamptz,
+          coalesce(p_shipping->'details', '{}'::jsonb),
+          nullif(p_shipping->>'boxnow_locker_id', ''), coalesce(p_shipping->>'boxnow_locker_name', ''))
+  returning * into v_order;
+
+  insert into order_items (order_id, product_id, name, price, quantity)
+    select v_order.id, p.id, p.name, p.price, i.qty
+      from unnest(v_ids, v_qtys) as i(pid, qty) join products p on p.id = i.pid;
+
+  if p_deduct then
+    update products p set stock = p.stock - i.qty
+      from unnest(v_ids, v_qtys) as i(pid, qty) where p.id = i.pid;
+    update orders set stock_deducted = true where id = v_order.id returning * into v_order;
+  end if;
+
+  return v_order;
+end $$;
+
+revoke all on function create_order(jsonb, jsonb, jsonb, payment_method, boolean) from public, anon, authenticated;
+grant execute on function create_order(jsonb, jsonb, jsonb, payment_method, boolean) to service_role;
+
+-- Доставка до адрес/офис вече е през Speedy; ръчните методи остават само за вземане от салона
+update shipping_methods set is_active = false where provider = 'manual' and delivery in ('address', 'office');
+-- @@SHIPPING_V3_END

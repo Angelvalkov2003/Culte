@@ -1,7 +1,8 @@
 import { formatEUR } from "@/lib/format";
 import { formatDateTime } from "@/lib/time";
 import { DELIVERY_LABEL, PAYMENT_LABEL, type Order } from "@/lib/types";
-import { EmailLayout, Items, P, Rows } from "./components";
+import { EmailLayout, Items, P, Rows, emailSite } from "./components";
+import { Link } from "@react-email/components";
 
 function lines(o: Order) {
   return [
@@ -32,6 +33,15 @@ export function OrderConfirmationEmail({ order }: { order: Order }) {
       <Items items={lines(order)} />
       <Rows rows={delivery(order)} />
       {order.payment_method === "cod" && <P>Ще платите {formatEUR(order.total)} при получаване.</P>}
+      {order.payment_method === "stripe" && order.stripe_payment_intent_id && (
+        <P>Платено с карта. Идентификатор на плащането: {order.stripe_payment_intent_id}</P>
+      )}
+      <P>
+        Имате право да се откажете от покупката в 14 дни от получаването, без да посочвате причина:{" "}
+        <Link href={`${emailSite}/withdrawal`}>Отказ от договора тук</Link>. Отворени запечатани козметични продукти не
+        подлежат на връщане. Пълни условия: <Link href={`${emailSite}/terms`}>Общи условия</Link>,{" "}
+        <Link href={`${emailSite}/shipping-returns`}>Доставка и връщане</Link>.
+      </P>
     </EmailLayout>
   );
 }
@@ -42,6 +52,11 @@ export function OrderAdminEmail({ order }: { order: Order }) {
       <P>Създадена на {formatDateTime(order.created_at)}.</P>
       <Items items={lines(order)} />
       <Rows rows={[...delivery(order), ["Имейл", order.customer_email]]} />
+      {order.invoice_requested && (
+        <P>
+          Поискана фактура: {[order.invoice_details.company, order.invoice_details.eik && `ЕИК ${order.invoice_details.eik}`, order.invoice_details.vat, order.invoice_details.address, order.invoice_details.mol && `МОЛ ${order.invoice_details.mol}`].filter(Boolean).join(", ")}
+        </P>
+      )}
     </EmailLayout>
   );
 }

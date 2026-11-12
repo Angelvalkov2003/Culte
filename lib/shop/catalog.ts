@@ -5,7 +5,7 @@ import { publicDb } from "@/lib/supabase/public";
 import type { Category, Product, ShippingMethod } from "@/lib/types";
 
 const PRODUCT_FIELDS =
-  "id, category_id, name, slug, description, price, stock, is_active, image_public_id, sort_order, category:categories(id, name, slug)";
+  "id, category_id, name, slug, description, price, stock, is_active, image_public_id, manufacturer, safety_info, sort_order, category:categories(id, name, slug)";
 
 export const getCategories = cache(async (): Promise<Category[]> => {
   if (!hasSupabase()) return [];

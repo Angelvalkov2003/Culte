@@ -58,6 +58,12 @@ export function ProductForm({
         <Field label="Описание" htmlFor="description">
           <Textarea id="description" name="description" rows={6} defaultValue={product?.description} maxLength={4000} />
         </Field>
+        <Field label="Безопасност и употреба" htmlFor="safety_info" hint="Предупреждения и указания (изискване на Регламент (ЕС) 2023/988).">
+          <Textarea id="safety_info" name="safety_info" rows={3} defaultValue={product?.safety_info} maxLength={2000} />
+        </Field>
+        <Field label="Производител / отговорно лице" htmlFor="manufacturer" hint="Име, адрес и контакт. Празно = търговецът от Настройки.">
+          <Input id="manufacturer" name="manufacturer" defaultValue={product?.manufacturer} maxLength={500} />
+        </Field>
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <SubmitButton size="md">{product ? "Запази" : "Добави продукта"}</SubmitButton>
           <Link href="/admin/products" className="text-sm link-underline">Назад към списъка</Link>

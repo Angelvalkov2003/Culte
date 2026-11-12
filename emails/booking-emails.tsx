@@ -1,13 +1,15 @@
 import { formatEUR, formatRange, formatMinutes, round2 } from "@/lib/format";
 import { formatLongDate, formatTime } from "@/lib/time";
 import { SIZE_LABEL, type Booking } from "@/lib/types";
-import { EmailLayout, Items, P, Rows } from "./components";
+import { EmailLayout, Items, P, Rows, emailSite } from "./components";
+import { Link } from "@react-email/components";
 
 type B = Booking & { booking_services?: { name: string; price_from: number; price_to: number; duration_max: number }[] };
 
 function details(b: B): [string, string][] {
   const minutes = Math.round((Date.parse(b.end_at) - Date.parse(b.start_at)) / 60000);
   return [
+    ...(b.number ? ([["Резервация №", String(b.number)]] as [string, string][]) : []),
     ["Дата", formatLongDate(b.start_at)],
     ["Час", `${formatTime(b.start_at)} – ${formatTime(b.end_at)} (${formatMinutes(minutes)})`],
     ["Куче", [b.dog_name, b.dog_breed].filter(Boolean).join(", ") || "—"],
@@ -40,8 +42,10 @@ export function BookingConfirmedEmail({ booking }: { booking: B }) {
       <Items items={services(booking)} />
       <Rows rows={money(booking)} />
       <P>
-        Окончателната цена зависи от състоянието на козината и се уточнява на място. Ако се налага промяна, обадете ни се
-        на 0878 817 088 поне 24 часа предварително.
+        Окончателната цена зависи от състоянието на козината и се уточнява на място. Можете да откажете резервацията
+        по всяко време преди часа и да получите капарото обратно — на 0878 817 088 или онлайн:{" "}
+        <Link href={`${emailSite}/withdrawal`}>Отказ от договора тук</Link> (с номера на резервацията). При неявяване без
+        предупреждение капарото се задържа. <Link href={`${emailSite}/terms`}>Общи условия</Link>
       </P>
     </EmailLayout>
   );

@@ -1,19 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getBusinessHours, getSettings, groupHours } from "@/lib/settings";
+import { companyInfo, getBusinessHours, getSettings, groupHours } from "@/lib/settings";
 
 const LEGAL = [
   { href: "/terms", label: "Общи условия" },
   { href: "/privacy", label: "Поверителност" },
   { href: "/cookies", label: "Бисквитки" },
   { href: "/shipping-returns", label: "Доставка и връщане" },
+  { href: "/withdrawal", label: "Отказ от договор" },
 ];
 
 export async function Footer() {
   const [s, hours] = await Promise.all([getSettings(), getBusinessHours()]);
   const tel = s.phone.replace(/\s+/g, "");
   return (
-    <footer className="mt-24 bg-espresso text-cream/85">
+    <footer className="mt-24 bg-espresso text-cream/85 pattern pattern-bones pattern-light">
       <div className="container-page grid gap-12 py-16 md:grid-cols-12">
         <div className="md:col-span-4">
           <Image src="/logo-nobg.png" alt="Culte" width={610} height={410} className="h-20 w-auto" />
@@ -72,7 +73,9 @@ export async function Footer() {
       </div>
       <div className="border-t border-cream/10">
         <div className="container-page flex flex-col gap-4 py-6 text-[13px] text-cream/60 md:flex-row md:items-center md:justify-between">
-          <p>© {new Date().getFullYear()} Culte. Всички права запазени.</p>
+          <p>
+            © {new Date().getFullYear()} {companyInfo(s).name}, ЕИК {companyInfo(s).eik}. Culte е търговска марка.
+          </p>
           <ul className="flex flex-wrap gap-x-6 gap-y-2">
             {LEGAL.map((l) => (
               <li key={l.href}>

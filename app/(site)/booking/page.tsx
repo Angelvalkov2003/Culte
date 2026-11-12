@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getActiveServices } from "@/lib/booking/services";
 import { getSettings } from "@/lib/settings";
 import { BookingWizard } from "@/components/booking/booking-wizard";
+import { DogCutout } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,15 @@ export default async function BookingPage() {
   const [services, settings] = await Promise.all([getActiveServices(), getSettings()]);
   return (
     <div className="container-page pt-12 pb-8">
-      <header className="max-w-2xl">
-        <h1 className="text-[clamp(2.4rem,5vw,3.8rem)]">Запази час за груминг</h1>
-        <p className="mt-4 text-[15px] leading-7 text-espresso-soft">
-          Работим с едно куче наведнъж, затова всеки час е изцяло ваш. Капарото е {settings.deposit_percent}% от
-          началната цена, остатъкът се плаща в салона.
-        </p>
+      <header className="flex items-end justify-between gap-8">
+        <div className="max-w-2xl">
+          <h1 className="text-[clamp(2.4rem,5vw,3.8rem)]">Запази час за груминг</h1>
+          <p className="mt-4 text-[15px] leading-7 text-espresso-soft">
+            Работим с едно куче наведнъж, затова всеки час е изцяло ваш. При записване плащате капаро, остатъкът се плаща в
+            салона.
+          </p>
+        </div>
+        <DogCutout dog="peach" priority sizes="240px" className="-mb-px hidden w-[240px] shrink-0 md:block" />
       </header>
       <div className="mt-10">
         {services.length === 0 ? (

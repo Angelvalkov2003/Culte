@@ -16,7 +16,7 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook   # копирай�
 
 ## Деплой във Vercel
 
-1. **Supabase.** Създайте проект → SQL Editor → изпълнете целия `supabase/schema.sql` наведнъж (таблици, RLS, функции, seed).
+1. **Supabase.** Създайте проект → SQL Editor → изпълнете целия `supabase/schema.sql` наведнъж. Файлът първо изтрива всичко от сайта и създава базата наново (таблици, RLS, функции, seed) — при промяна по схемата се пуска отново целият.
    От Project Settings → API вземете URL, publishable (или anon) ключа и service role ключа.
 2. **Vercel.** Import на GitHub репото → Framework: Next.js. В Settings → Environment Variables добавете всички имена от
    `.env.example`:

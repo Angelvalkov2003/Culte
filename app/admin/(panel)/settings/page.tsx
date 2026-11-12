@@ -23,6 +23,22 @@ export default async function SettingsPage() {
     <>
       <PageHeader title="Настройки" />
       <ActionForm action={saveSettings} className="max-w-3xl space-y-6">
+        <Panel title="Търговец (задължително по ЗЕТ и ЗЗП)">
+          <p className="mb-4 text-sm text-espresso-soft">
+            Показват се в долната част на сайта, в общите условия, политиката за поверителност и формуляра за отказ.
+          </p>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <div className="sm:col-span-2">{text("company_name", "Наименование (фирма)", "напр. „Култ“ ЕООД")}</div>
+            {text("company_eik", "ЕИК")}
+            {text("company_vat", "ДДС номер", "напр. BG123456789; празно, ако няма")}
+            <div className="sm:col-span-2">{text("company_address", "Седалище и адрес на управление")}</div>
+            {text("company_email", "Имейл за контакт с клиенти", undefined, "email")}
+            <label className="flex items-center gap-3 self-end pb-3 text-[15px]">
+              <input type="checkbox" name="vat_registered" defaultChecked={v.vat_registered !== false} className="size-4 accent-terracotta" />
+              Регистриран по ДДС (цените са с ДДС)
+            </label>
+          </div>
+        </Panel>
         <Panel title="Салон">
           <div className="grid gap-5 sm:grid-cols-2">
             {text("business_name", "Име")}

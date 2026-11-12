@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/site/product-card";
 import { Input, Select } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { FiltersToggle } from "@/components/shop/filters-toggle";
+import { DogCutout } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 
@@ -52,12 +53,18 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   return (
     <div className="container-page pt-12">
-      <header className="grid gap-6 md:grid-cols-12">
-        <h1 className="text-[clamp(2.6rem,6vw,4.4rem)] md:col-span-7">{active ? active.name : "Козметика за кучета"}</h1>
-        <p className="self-end text-[15px] leading-7 text-espresso-soft md:col-span-4 md:col-start-9">
+      <header className="grid items-end gap-6 border-b border-espresso/15 md:grid-cols-12">
+        <h1 className="pb-6 text-[clamp(2.6rem,6vw,4.4rem)] md:col-span-6">{active ? active.name : "Козметика за кучета"}</h1>
+        <p className="pb-6 text-[15px] leading-7 text-espresso-soft md:col-span-3">
           {active?.description ||
             "Продуктите, с които работим в салона, подбрани за домашна грижа между две посещения."}
         </p>
+        <DogCutout
+          dog="yorkieSalon"
+          priority
+          sizes="260px"
+          className="hidden w-full max-w-[260px] justify-self-end md:col-span-3 md:block"
+        />
       </header>
 
       <div className="mt-12 grid gap-10 lg:grid-cols-12">

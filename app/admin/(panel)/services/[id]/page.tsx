@@ -19,7 +19,7 @@ export default async function ServiceEdit({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <PageHeader title={s ? s.name : "Нова услуга"} />
+      <PageHeader title={s ? s.name : "Нова услуга"} back={{ href: "/admin/services", label: "Всички услуги" }} />
       <ActionForm action={saveService} className="max-w-2xl space-y-5">
         {s && <input type="hidden" name="id" value={s.id} />}
         <div className="grid gap-5 sm:grid-cols-2">
@@ -49,13 +49,35 @@ export default async function ServiceEdit({ params }: { params: Promise<{ id: st
             <Input id="price_to" name="price_to" type="number" step="0.01" min={0} defaultValue={s?.price_to ?? ""} required />
           </Field>
         </div>
-        <Field label="Описание" htmlFor="description">
-          <Textarea id="description" name="description" rows={3} defaultValue={s?.description} />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field label="Група" htmlFor="group_name">
+            <Select id="group_name" name="group_name" defaultValue={s?.group_name ?? "single"}>
+              <option value="package">Пакети</option>
+              <option value="single">Отделни услуги</option>
+              <option value="care">Хигиена и грижа</option>
+            </Select>
+          </Field>
+          <Field label="Капаро, €" htmlFor="deposit" hint="Празно = 50% от „Цена от“, закръглено до 10 € при диапазон.">
+            <Input id="deposit" name="deposit" type="number" step="0.01" min={0} defaultValue={s?.deposit ?? ""} />
+          </Field>
+        </div>
+        <Field label="Кратко описание" htmlFor="description">
+          <Textarea id="description" name="description" rows={2} defaultValue={s?.description} />
+        </Field>
+        <Field label="Включва" htmlFor="includes" hint="Какво точно е включено — показва се на клиента.">
+          <Textarea id="includes" name="includes" rows={3} defaultValue={s?.includes} />
+        </Field>
+        <Field label="Подходящо за породи" htmlFor="breeds">
+          <Input id="breeds" name="breeds" defaultValue={s?.breeds} />
         </Field>
         <div className="flex flex-wrap gap-6 text-[15px]">
           <label className="flex items-center gap-2">
             <input type="checkbox" name="is_addon" defaultChecked={s?.is_addon ?? false} className="size-4 accent-terracotta" />
             Само като допълнителна услуга
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="checkbox" name="addon_allowed" defaultChecked={s?.addon_allowed ?? false} className="size-4 accent-terracotta" />
+            Може да се добави към друга услуга
           </label>
           <label className="flex items-center gap-2">
             <input type="checkbox" name="is_active" defaultChecked={s?.is_active ?? true} className="size-4 accent-terracotta" />

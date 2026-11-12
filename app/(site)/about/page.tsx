@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getSettings } from "@/lib/settings";
 import { ButtonLink } from "@/components/ui/button";
+import { PopOut } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -33,10 +34,13 @@ export default async function AboutPage() {
             <li>След груминга ви казваме какво видяхме и как да поддържате козината у дома.</li>
           </ul>
         </div>
-        <aside className="self-start rounded-lg bg-sand p-6 md:col-span-4 md:col-start-9">
+        <aside className="group self-start md:col-span-4 md:col-start-9 md:row-span-2 md:row-start-1">
+          <PopOut dog="puppy" tone="sand" priority className="mx-auto max-w-[320px] md:max-w-none" blockClassName="rounded-b-none" sizes="(min-width: 768px) 380px, 320px" />
+          <div className="mx-auto max-w-[320px] rounded-b-lg bg-sand p-6 pt-2 md:max-w-none">
           <p className="font-serif text-2xl">Елате да се запознаем</p>
           <p className="mt-2 text-[15px] text-espresso-soft">{s.address}</p>
           <ButtonLink href="/booking" className="mt-6">Запази час</ButtonLink>
+          </div>
         </aside>
       </div>
     </div>

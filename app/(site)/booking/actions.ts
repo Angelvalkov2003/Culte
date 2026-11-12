@@ -26,6 +26,7 @@ const schema = z.object({
   dogName: z.string().trim().min(1, "Въведете името на кучето").max(60),
   dogBreed: z.string().trim().min(2, "Въведете породата").max(80),
   message: z.string().trim().max(1000).optional().default(""),
+  // Едно общо съгласие: условия + изрично искане услугата да се изпълни в 14-дневния срок
   terms: z.literal(true, { error: "Необходимо е съгласие с условията" }),
 });
 
@@ -73,8 +74,9 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
         total_to: q.totalTo,
         deposit_amount: q.deposit,
         terms_accepted_at: new Date().toISOString(),
+        service_consent_at: new Date().toISOString(),
       })
-      .select("id")
+      .select("id, number")
       .single();
 
     if (error) {
@@ -113,13 +115,13 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
               currency: "eur",
               unit_amount: toCents(q.deposit),
               product_data: {
-                name: `Капаро ${settings.deposit_percent}% за груминг`,
+                name: "Капаро за груминг",
                 description: `${formatLongDate(start)}, ${v.time} — ${all.map((s) => s.name).join(", ")}`,
               },
             },
           },
         ],
-        metadata: { kind: "booking", booking_id: booking.id },
+        metadata: { kind: "booking", booking_id: booking.id, booking_number: String(booking.number) },
         payment_intent_data: { metadata: { kind: "booking", booking_id: booking.id } },
         success_url: `${site}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${site}/booking/cancel?booking=${booking.id}`,

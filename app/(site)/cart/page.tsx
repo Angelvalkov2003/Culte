@@ -4,6 +4,7 @@ import { getCart } from "@/lib/shop/cart";
 import { formatEUR } from "@/lib/format";
 import { ButtonLink } from "@/components/ui/button";
 import { ProductImage } from "@/components/site/product-image";
+import { PopOut } from "@/components/site/dog-figure";
 import { CartLineControls } from "@/components/shop/cart-line-controls";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +18,15 @@ export default async function CartPage() {
     <div className="container-page pt-12">
       <h1 className="text-5xl">Количка</h1>
       {cart.items.length === 0 ? (
-        <div className="mt-8 max-w-xl">
-          <p className="text-[15px] text-espresso-soft">Количката е празна. Разгледайте козметиката, която ползваме в салона.</p>
-          <ButtonLink href="/shop" className="mt-6">
-            Към магазина
-          </ButtonLink>
+        <div className="group mt-10 grid max-w-3xl items-end gap-8 sm:grid-cols-[220px_1fr]">
+          <PopOut dog="blue" tone="sand" className="w-[220px]" sizes="220px" />
+          <div className="pb-2">
+            <p className="font-serif text-3xl">Тук е празно засега</p>
+            <p className="mt-2 text-[15px] text-espresso-soft">Разгледайте козметиката, която ползваме в салона.</p>
+            <ButtonLink href="/shop" className="mt-6">
+              Към магазина
+            </ButtonLink>
+          </div>
         </div>
       ) : (
         <div className="mt-10 grid gap-10 lg:grid-cols-12">

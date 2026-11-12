@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { db } from "@/lib/supabase/admin";
 import { getCart, writeCart } from "@/lib/shop/cart";
-import { getShippingMethods } from "@/lib/shop/catalog";
+import { resolveShipping, shippingSelectionSchema, ShippingError, totalMatches } from "@/lib/shipping/resolve";
 import { getOrder, sendOrderPlacedEmails } from "@/lib/shop/orders";
 import { stripe, checkoutExpiry } from "@/lib/stripe";
 import { siteUrl } from "@/lib/env";
@@ -15,12 +15,19 @@ const schema = z
     name: z.string().trim().min(3, "Въведете име и фамилия").max(100),
     email: z.email("Въведете валиден имейл").max(200),
     phone: z.string().trim().regex(/^[+\d][\d\s()-]{6,20}$/, "Въведете валиден телефон"),
-    city: z.string().trim().max(80).optional().default(""),
-    address: z.string().trim().max(300).optional().default(""),
     note: z.string().trim().max(1000).optional().default(""),
-    shippingMethodId: z.uuid("Изберете начин на доставка"),
+    shipping: shippingSelectionSchema,
+    /** Цената, която клиентът вижда (само за сравнение — не се записва) */
+    clientShippingPrice: z.number().min(0).max(1000),
+    clientTotal: z.number().min(0).max(100000),
     paymentMethod: z.enum(["stripe", "cod"], { error: "Изберете начин на плащане" }),
     terms: z.literal(true, { error: "Необходимо е съгласие с условията" }),
+    invoice: z.boolean().default(false),
+    invoiceCompany: z.string().trim().max(200).default(""),
+    invoiceEik: z.string().trim().max(20).default(""),
+    invoiceVat: z.string().trim().max(20).default(""),
+    invoiceAddress: z.string().trim().max(300).default(""),
+    invoiceMol: z.string().trim().max(100).default(""),
   });
 
 export type CheckoutInput = z.input<typeof schema>;
@@ -34,40 +41,62 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   const parsed = schema.safeParse(input);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
-    for (const i of parsed.error.issues) fieldErrors[String(i.path[0])] ??= i.message;
-    return { ok: false, error: "Проверете попълнените полета.", fieldErrors };
+    for (const i of parsed.error.issues) {
+      const key = i.path[0] === "shipping" ? String(i.path[1] ?? "shipping") : String(i.path[0]);
+      fieldErrors[key] ??= i.message;
+    }
+    const shippingErr = parsed.error.issues.find((i) => i.path[0] === "shipping");
+    return { ok: false, error: shippingErr ? "Изберете и попълнете начина на доставка." : "Проверете попълнените полета.", fieldErrors };
   }
   const v = parsed.data;
 
-  const methods = await getShippingMethods();
-  const method = methods.find((m) => m.id === v.shippingMethodId);
-  if (!method) return { ok: false, error: "Изберете начин на доставка.", fieldErrors: { shippingMethodId: "Изберете начин на доставка" } };
-  if (method.delivery !== "pickup") {
+  if (v.invoice) {
     const fe: Record<string, string> = {};
-    if (v.city.length < 2) fe.city = "Въведете град";
-    if (v.address.length < 3) fe.address = method.delivery === "office" ? "Въведете офис на куриера" : "Въведете адрес";
-    if (Object.keys(fe).length) return { ok: false, error: "Проверете адреса за доставка.", fieldErrors: fe };
+    if (v.invoiceCompany.length < 2) fe.invoiceCompany = "Въведете фирма";
+    if (!/^(\d{9}|\d{10}|\d{13})$/.test(v.invoiceEik)) fe.invoiceEik = "ЕИК/ЕГН: 9, 10 или 13 цифри";
+    if (v.invoiceAddress.length < 5) fe.invoiceAddress = "Въведете адрес по регистрация";
+    if (Object.keys(fe).length) return { ok: false, error: "Проверете данните за фактура.", fieldErrors: fe };
   }
 
   const cart = await getCart();
   if (!cart.items.length) return { ok: false, error: "Количката е празна." };
   if (cart.items.some((i) => i.adjusted)) return { ok: false, error: STOCK_MSG };
 
+  // Доставката се преизчислява на сървъра (Speedy/BoxNow/ръчна) — не вярваме на цената от клиента
+  let shipping;
+  try {
+    shipping = await resolveShipping(v.shipping, cart.subtotal);
+  } catch (e) {
+    if (e instanceof ShippingError) return { ok: false, error: e.message };
+    console.error("resolveShipping", e);
+    return { ok: false, error: "Не успяхме да изчислим доставката. Опитайте отново." };
+  }
+  if (!totalMatches(v.clientTotal, cart.subtotal, shipping.price)) {
+    return {
+      ok: false,
+      error: `Цената на доставката се промени на ${shipping.price.toFixed(2).replace(".", ",")} €. Прегледайте сумата и потвърдете отново.`,
+    };
+  }
+
   const items = cart.items.map((i) => ({ product_id: i.product.id, quantity: i.quantity }));
   const customer = {
     name: v.name,
     email: v.email,
     phone: v.phone,
-    city: method.delivery === "pickup" ? "Пловдив" : v.city,
-    address: method.delivery === "pickup" ? "Вземане от салона" : v.address,
+    city: shipping.city,
+    address: shipping.address,
     note: v.note,
+    invoice_requested: v.invoice,
+    invoice_details: v.invoice
+      ? { company: v.invoiceCompany, eik: v.invoiceEik, vat: v.invoiceVat, address: v.invoiceAddress, mol: v.invoiceMol }
+      : {},
   };
 
   // create_order проверява наличности и цени в базата; при наложен платеж намалява бройките атомарно
   const { data, error } = await db().rpc("create_order", {
     p_customer: customer,
     p_items: items,
-    p_shipping_method_id: method.id,
+    p_shipping: shipping,
     p_payment_method: v.paymentMethod,
     p_deduct: v.paymentMethod === "cod",
   });

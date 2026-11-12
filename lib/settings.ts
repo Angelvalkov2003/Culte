@@ -20,6 +20,12 @@ export interface SiteSettings {
   min_lead_hours: number;
   max_days_ahead: number;
   hold_minutes: number;
+  company_name: string;
+  company_eik: string;
+  company_vat: string;
+  company_address: string;
+  company_email: string;
+  vat_registered: boolean;
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -38,7 +44,29 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   min_lead_hours: 2,
   max_days_ahead: 60,
   hold_minutes: 30,
+  company_name: "",
+  company_eik: "",
+  company_vat: "",
+  company_address: "",
+  company_email: "",
+  vat_registered: true,
 };
+
+/** Данни за търговеца с видим маркер, ако още не са попълнени в админ панела. */
+export function companyInfo(s: SiteSettings) {
+  const v = (x: string, label: string) => x?.trim() || `[${label}]`;
+  return {
+    name: v(s.company_name, "Наименование на търговеца"),
+    eik: v(s.company_eik, "ЕИК"),
+    vat: s.company_vat?.trim() || "",
+    address: v(s.company_address, "Седалище и адрес на управление"),
+    email: v(s.company_email, "имейл за контакт"),
+    phone: s.phone,
+    salon: s.address,
+    vatRegistered: s.vat_registered !== false,
+    complete: Boolean(s.company_name?.trim() && s.company_eik?.trim() && s.company_address?.trim() && s.company_email?.trim()),
+  };
+}
 
 export const DEFAULT_HOURS: BusinessHours[] = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
   weekday,

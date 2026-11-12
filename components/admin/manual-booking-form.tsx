@@ -35,7 +35,7 @@ export function ManualBookingForm({ services, defaultDate, defaultTime }: { serv
             <fieldset>
               <legend className="text-sm font-medium">Допълнителни</legend>
               <div className="mt-2 space-y-1.5">
-                {sized.filter((s) => s.id !== mainId).map((s) => (
+                {sized.filter((s) => s.id !== mainId && (s.is_addon || s.addon_allowed)).map((s) => (
                   <label key={s.id} className="flex items-center gap-2 text-sm">
                     <input type="checkbox" name="addon_ids[]" value={s.id} checked={addons.includes(s.id)} className="size-4 accent-terracotta"
                       onChange={() => setAddons((a) => (a.includes(s.id) ? a.filter((x) => x !== s.id) : [...a, s.id]))} />

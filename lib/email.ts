@@ -12,12 +12,19 @@ function resend(): Resend | null {
   return client;
 }
 
-/** Праща имейл; никога не хвърля — грешките се логват, за да не спират плащане/webhook. */
+/**
+ * Праща имейл; никога не хвърля — грешките се логват, за да не спират плащане/webhook.
+ * Без верифициран домейн в Resend имейли получава само собственикът (CONTACT_EMAIL);
+ * писмата до клиенти се пропускат, освен ако EMAIL_TO_CUSTOMERS=true.
+ */
 export async function sendEmail(opts: { to: string | string[]; subject: string; react: ReactElement; replyTo?: string }) {
   const r = resend();
-  const to = (Array.isArray(opts.to) ? opts.to : [opts.to]).filter(Boolean);
+  const owner = env.contactEmail().toLowerCase();
+  const to = (Array.isArray(opts.to) ? opts.to : [opts.to])
+    .filter(Boolean)
+    .filter((addr) => env.emailToCustomers() || addr.trim().toLowerCase() === owner);
   if (!r || !to.length) {
-    console.warn(`[email] пропуснат (няма RESEND_API_KEY или получател): ${opts.subject}`);
+    if (!r) console.warn(`[email] пропуснат (няма RESEND_API_KEY): ${opts.subject}`);
     return;
   }
   try {

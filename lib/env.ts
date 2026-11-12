@@ -19,6 +19,8 @@ export const env = {
   stripeWebhookSecret: () => required("STRIPE_WEBHOOK_SECRET"),
   resendKey: () => read("RESEND_API_KEY"),
   contactEmail: () => read("CONTACT_EMAIL"),
+  /** true → имейли и до клиентите (нужен е верифициран домейн в Resend). */
+  emailToCustomers: () => read("EMAIL_TO_CUSTOMERS") === "true",
   emailFrom: () => read("EMAIL_FROM") || "Culte <onboarding@resend.dev>",
   adminPassword: () => required("ADMIN_PASSWORD"),
   adminSecret: () => required("ADMIN_SESSION_SECRET"),

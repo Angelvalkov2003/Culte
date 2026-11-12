@@ -22,7 +22,7 @@ export default async function ProductEdit({ params }: { params: Promise<{ id: st
   const cfg = cloudinaryConfig();
   return (
     <>
-      <PageHeader title={isNew ? "Нов продукт" : product!.name} />
+      <PageHeader title={isNew ? "Нов продукт" : product!.name} back={{ href: "/admin/products", label: "Всички продукти" }} />
       <ProductForm
         product={product}
         categories={(cats ?? []) as Category[]}

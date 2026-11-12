@@ -2,6 +2,7 @@ import "server-only";
 import { hasSupabase } from "@/lib/env";
 import { publicDb } from "@/lib/supabase/public";
 import { round2 } from "@/lib/format";
+import { serviceDeposit } from "@/lib/booking/deposit";
 import type { DogSize, Service } from "@/lib/types";
 
 export async function getActiveServices(): Promise<Service[]> {
@@ -13,7 +14,8 @@ export async function getActiveServices(): Promise<Service[]> {
     .order("size")
     .order("sort_order");
   if (error) console.error("services", error.message);
-  return data ?? [];
+  // Стойности по подразбиране, ако базата е със стара схема
+  return (data ?? []).map((s) => ({ group_name: "single", includes: "", breeds: "", addon_allowed: false, deposit: null, ...s }));
 }
 
 export interface Quote {
@@ -25,7 +27,7 @@ export interface Quote {
   deposit: number;
 }
 
-/** Продължителност = сума от максималните; капаро = % от сумата на началните цени. */
+/** Продължителност = сума от максималните; капаро = сума от капарата на услугите. */
 export function quote(main: Service, addons: Service[], depositPercent: number): Quote {
   const all = [main, ...addons];
   const totalFrom = round2(all.reduce((s, x) => s + Number(x.price_from), 0));
@@ -36,7 +38,7 @@ export function quote(main: Service, addons: Service[], depositPercent: number):
     durationMin: all.reduce((s, x) => s + x.duration_max, 0),
     totalFrom,
     totalTo,
-    deposit: round2((totalFrom * depositPercent) / 100),
+    deposit: round2(all.reduce((s, x) => s + serviceDeposit(x, depositPercent), 0)),
   };
 }
 
@@ -52,6 +54,6 @@ export async function resolveServices(
   const main = rows.find((s) => s.id === mainId);
   if (!main || main.size !== size || main.is_addon) return null;
   const addons = addonIds.map((id) => rows.find((s) => s.id === id));
-  if (addons.some((a) => !a || a.size !== size || a.id === mainId)) return null;
+  if (addons.some((a) => !a || a.size !== size || a.id === mainId || !(a.is_addon || a.addon_allowed))) return null;
   return { main, addons: addons as Service[] };
 }

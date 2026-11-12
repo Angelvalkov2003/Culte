@@ -3,14 +3,18 @@
 import { z } from "zod";
 import { adminAction, f } from "@/lib/admin/action";
 import { db } from "@/lib/supabase/admin";
-import { changeOrderStatus } from "@/lib/shop/orders";
+import { changeOrderStatus, refundOrder } from "@/lib/shop/orders";
 
 const STATUSES = ["pending_payment", "new", "processing", "shipped", "delivered", "cancelled", "expired", "stock_issue"] as const;
 
 export const updateOrderStatus = adminAction(
-  z.object({ id: f.uuid(), status: z.enum(STATUSES), tracking_number: f.text(100) }),
-  async ({ id, status, tracking_number }) => {
+  z.object({ id: f.uuid(), status: z.enum(STATUSES), tracking_number: f.text(100), refund: f.bool() }),
+  async ({ id, status, tracking_number, refund }) => {
     await changeOrderStatus(id, status, tracking_number);
+    if (refund) {
+      await refundOrder(id);
+      return "Статусът е сменен и сумата е върната по картата.";
+    }
     return status === "shipped"
       ? "Статусът е сменен и клиентът е уведомен."
       : status === "cancelled"

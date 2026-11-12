@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { getActiveServices } from "@/lib/booking/services";
 import { getBusinessHours, getSettings, groupHours } from "@/lib/settings";
-import { formatDuration, formatRange } from "@/lib/format";
-import { SIZE_LABEL, type DogSize } from "@/lib/types";
+import { formatDuration, formatEUR, formatRange } from "@/lib/format";
+import { PRICE_NOTE, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type ServiceGroup } from "@/lib/types";
+import { serviceDeposit } from "@/lib/booking/deposit";
 import { ButtonLink } from "@/components/ui/button";
+import { PopOut } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 
@@ -31,15 +33,18 @@ export default async function GroomingPage() {
             Запази час
           </ButtonLink>
         </div>
-        <dl className="space-y-2 self-end text-[15px] md:col-span-4 md:col-start-9">
-          {groupHours(hours).map((h) => (
-            <div key={h.label} className="flex justify-between gap-4 border-b border-line py-2">
-              <dt className="text-espresso-soft">{h.label}</dt>
-              <dd className="tabular-nums">{h.value}</dd>
-            </div>
-          ))}
-          <p className="pt-3 text-espresso-soft">{s.address}</p>
-        </dl>
+        <div className="group self-end md:col-span-4 md:col-start-9">
+          <PopOut dog="yorkieScissors" tone="clay" priority className="mx-auto max-w-[300px] md:mx-0 md:max-w-none" sizes="(min-width: 768px) 360px, 300px" />
+          <dl className="mt-6 space-y-2 text-[15px]">
+            {groupHours(hours).map((h) => (
+              <div key={h.label} className="flex justify-between gap-4 border-b border-line py-2">
+                <dt className="text-espresso-soft">{h.label}</dt>
+                <dd className="tabular-nums">{h.value}</dd>
+              </div>
+            ))}
+            <p className="pt-3 text-espresso-soft">{s.address}</p>
+          </dl>
+        </div>
       </header>
 
       <div className="mt-20 space-y-20">
@@ -50,6 +55,7 @@ export default async function GroomingPage() {
             <section key={size} aria-labelledby={`size-${size}`} className="grid gap-6 md:grid-cols-12">
               <h2 id={`size-${size}`} className="text-4xl md:col-span-3">
                 {SIZE_LABEL[size]}
+                <span className="mt-2 block font-sans text-[15px] font-medium text-espresso-soft">{SIZE_HINT[size]}</span>
               </h2>
               <div className="md:col-span-9">
                 <table className="w-full text-left text-[15px]">
@@ -61,12 +67,18 @@ export default async function GroomingPage() {
                       <th scope="col" className="py-2 text-right font-normal">Цена</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {list.map((x) => (
+                  {(["package", "single", "care"] as ServiceGroup[]).map((g) => {
+                    const rows = list.filter((x) => x.group_name === g);
+                    if (!rows.length) return null;
+                    return (
+                  <tbody key={g}>
+                    <tr><th colSpan={3} scope="rowgroup" className="pt-6 pb-1 text-left text-sm font-semibold">{SERVICE_GROUP_LABEL[g]}</th></tr>
+                    {rows.map((x) => (
                       <tr key={x.id} className="border-b border-line align-top">
                         <td className="py-3.5 pr-4">
                           <span className="font-medium">{x.name}</span>
                           {x.description && <span className="mt-0.5 block text-sm text-espresso-soft">{x.description}</span>}
+                          {x.includes && <span className="mt-1 block text-sm"><span className="text-espresso-soft">Включва: </span>{x.includes}</span>}
                           <span className="mt-0.5 block text-sm text-espresso-soft sm:hidden">
                             {formatDuration(x.duration_min, x.duration_max)}
                           </span>
@@ -76,10 +88,13 @@ export default async function GroomingPage() {
                         </td>
                         <td className="py-3.5 text-right whitespace-nowrap tabular-nums">
                           {formatRange(x.price_from, x.price_to)}
+                          <span className="block text-xs text-espresso-soft">капаро {formatEUR(serviceDeposit(x, s.deposit_percent))}</span>
                         </td>
                       </tr>
                     ))}
                   </tbody>
+                    );
+                  })}
                 </table>
               </div>
             </section>
@@ -88,8 +103,7 @@ export default async function GroomingPage() {
       </div>
 
       <p className="mt-12 max-w-2xl text-sm leading-6 text-espresso-soft">
-        Цените са ориентировъчни. Крайната цена зависи от състоянието на козината и се уточнява в салона. При онлайн
-        записване се плаща капаро {s.deposit_percent}% от началната цена.
+        {PRICE_NOTE} Телефон: {s.phone}. При онлайн записване се плаща посоченото капаро, остатъкът — в салона.
       </p>
     </div>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RowLink } from "@/components/admin/row-link";
 import { db } from "@/lib/supabase/admin";
 import { formatEUR, cn } from "@/lib/format";
 import { fmt, formatTime } from "@/lib/time";
@@ -55,7 +56,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
           </thead>
           <tbody>
             {items.map((b) => (
-              <tr key={b.id}>
+              <RowLink key={b.id} href={`/admin/bookings/${b.id}`}>
                 <Td className="whitespace-nowrap">
                   <Link href={`/admin/bookings/${b.id}`} className="font-medium hover:text-terracotta">
                     {fmt(b.start_at, "EEE, d MMM")} {formatTime(b.start_at)}–{formatTime(b.end_at)}
@@ -66,7 +67,7 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
                 <Td>{b.customer_name}<span className="block text-xs text-espresso-soft">{b.customer_phone}</span></Td>
                 <Td className="text-right tabular-nums">{b.deposit_paid ? formatEUR(b.deposit_amount) : b.source === "manual" ? "ръчна" : "—"}{b.refund_id && <span className="block text-xs text-danger">върнато</span>}</Td>
                 <Td><StatusBadge status={b.status} label={BOOKING_STATUS_LABEL[b.status]} /></Td>
-              </tr>
+              </RowLink>
             ))}
           </tbody>
         </Table>

@@ -23,6 +23,12 @@ const schema = z.object({
   min_lead_hours: f.int("Минимум часове напред", 0, 240),
   max_days_ahead: f.int("Максимум дни напред", 1, 365),
   hold_minutes: f.int("Задържане", 30, 1440),
+  company_name: f.text(200),
+  company_eik: z.string().trim().regex(/^(\d{9}|\d{13})?$/, "ЕИК трябва да е 9 или 13 цифри.").default(""),
+  company_vat: f.text(20),
+  company_address: f.text(300),
+  company_email: z.union([z.literal(""), z.email("Невалиден имейл на търговеца.")]).default(""),
+  vat_registered: f.bool(),
 });
 
 export const saveSettings = adminAction(schema, async (d) => {

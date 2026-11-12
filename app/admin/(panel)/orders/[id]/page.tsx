@@ -8,6 +8,7 @@ import { DELIVERY_LABEL, ORDER_STATUS_LABEL, PAYMENT_LABEL, type OrderStatus } f
 import { saveOrderDetails, updateOrderStatus } from "@/app/admin/_actions/orders";
 import { ActionForm, SubmitButton } from "@/components/admin/action-form";
 import { PageHeader, Panel, StatusBadge } from "@/components/admin/ui";
+import { ShippingPanel } from "@/components/admin/shipping-panel";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 
 export const metadata = { title: "Поръчка" };
@@ -22,7 +23,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
   return (
     <>
-      <PageHeader title={`Поръчка № ${o.number}`} actions={<Link href="/admin/orders" className="text-sm link-underline">Всички поръчки</Link>}>
+      <PageHeader title={`Поръчка № ${o.number}`} back={{ href: "/admin/orders", label: "Всички поръчки" }}>
         {formatDateTime(o.created_at)} · {PAYMENT_LABEL[o.payment_method]}
         {o.paid_at ? ` · платена ${formatDateTime(o.paid_at)}` : ""} · <StatusBadge status={o.status} label={ORDER_STATUS_LABEL[o.status]} />
       </PageHeader>
@@ -45,6 +46,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               {o.stripe_payment_intent_id && ` Stripe: ${o.stripe_payment_intent_id}`}
             </p>
           </Panel>
+
+          <ShippingPanel o={o} />
 
           <Panel title="Клиент и доставка">
             <ActionForm action={saveOrderDetails} className="space-y-4">
@@ -76,12 +79,22 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <Field label="Номер на товарителница" htmlFor="tracking_number">
               <Input id="tracking_number" name="tracking_number" defaultValue={o.tracking_number} />
             </Field>
+            {o.payment_method === "stripe" && o.paid_at && !o.refund_id && (
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="refund" className="size-4 accent-terracotta" />
+                Върни {formatEUR(o.total)} по картата (Stripe)
+              </label>
+            )}
             <SubmitButton size="md">Смени статуса</SubmitButton>
           </ActionForm>
-          {o.payment_method === "stripe" && o.paid_at && (
-            <p className="mt-4 text-xs text-espresso-soft">
-              При отказ на платена поръчка върнете сумата от Stripe Dashboard → Payments.
-            </p>
+          {o.refund_id && <p className="mt-4 text-sm text-danger">Сумата е върната {o.refunded_at && formatDateTime(o.refunded_at)}.</p>}
+          {o.invoice_requested && (
+            <div className="mt-6 border-t border-line pt-4 text-sm">
+              <p className="font-medium">Поискана фактура</p>
+              <p className="mt-1 text-espresso-soft">
+                {[o.invoice_details.company, o.invoice_details.eik && `ЕИК ${o.invoice_details.eik}`, o.invoice_details.vat && `ДДС ${o.invoice_details.vat}`, o.invoice_details.address, o.invoice_details.mol && `МОЛ ${o.invoice_details.mol}`].filter(Boolean).join(", ")}
+              </p>
+            </div>
           )}
         </Panel>
       </div>

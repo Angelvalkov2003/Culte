@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductBySlug, getRelatedProducts } from "@/lib/shop/catalog";
 import { siteUrl } from "@/lib/env";
+import { companyInfo, getSettings } from "@/lib/settings";
 import { formatEUR } from "@/lib/format";
 import { ProductImage } from "@/components/site/product-image";
 import { ProductCard } from "@/components/site/product-card";
@@ -33,7 +34,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function ProductPage({ params }: Params) {
   const product = await getProductBySlug((await params).slug);
   if (!product) notFound();
-  const related = await getRelatedProducts(product);
+  const [related, settings] = await Promise.all([getRelatedProducts(product), getSettings()]);
+  const c = companyInfo(settings);
+  const manufacturer = product.manufacturer?.trim() || `${c.name}, ${c.address}, ${c.email}`;
   const soldOut = product.stock <= 0;
   const url = `${siteUrl()}/products/${product.slug}`;
 
@@ -77,6 +80,16 @@ export default async function ProductPage({ params }: Params) {
           <div className="prose-culte mt-10 border-t border-line pt-6">
             <p>{product.description}</p>
           </div>
+          {product.safety_info && (
+            <details className="mt-6 border-t border-line pt-4 text-sm">
+              <summary className="cursor-pointer font-medium">Безопасност и употреба</summary>
+              <p className="mt-2 leading-6 text-espresso-soft">{product.safety_info}</p>
+            </details>
+          )}
+          <details className="mt-3 border-t border-line pt-4 text-sm">
+            <summary className="cursor-pointer font-medium">Производител</summary>
+            <p className="mt-2 leading-6 text-espresso-soft">{manufacturer}</p>
+          </details>
           <p className="mt-6 text-sm text-espresso-soft">
             Доставка в цялата страна до адрес или офис, или вземане от салона в Пловдив.{" "}
             <Link href="/shipping-returns" className="link-underline">

@@ -45,6 +45,8 @@ const productSchema = z.object({
   sort_order: f.int("Ред", -100000),
   is_active: f.bool(),
   image_public_id: f.text(300),
+  manufacturer: f.text(500),
+  safety_info: f.text(2000),
 });
 
 export const saveProduct = adminAction(productSchema, async (d) => {
@@ -58,6 +60,8 @@ export const saveProduct = adminAction(productSchema, async (d) => {
     sort_order: d.sort_order,
     is_active: d.is_active,
     image_public_id: d.image_public_id || null,
+    manufacturer: d.manufacturer,
+    safety_info: d.safety_info,
   };
   if (d.id) {
     const { error } = await db().from("products").update(row).eq("id", d.id);

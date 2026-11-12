@@ -19,6 +19,8 @@ export async function GET(req: NextRequest) {
   }
 
   await expireStaleBookings();
+  const { data: cleaned, error: cleanErr } = await db().rpc("cleanup_stale_data", { p_days: 30 });
+  if (cleanErr) console.error("cleanup_stale_data", cleanErr.message);
 
   const tomorrow = addDaysISO(todaySofia(), 1);
   const from = sofiaToDate(tomorrow, "00:00").toISOString();
@@ -51,5 +53,5 @@ export async function GET(req: NextRequest) {
     });
     sent++;
   }
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent, cleaned });
 }

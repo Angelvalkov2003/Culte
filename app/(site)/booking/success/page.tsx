@@ -5,6 +5,7 @@ import { formatEUR, formatRange, round2 } from "@/lib/format";
 import { formatLongDate, formatTime } from "@/lib/time";
 import { ButtonLink } from "@/components/ui/button";
 import { AutoRefresh } from "@/components/site/auto-refresh";
+import { DogCutout } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Часът е запазен", robots: { index: false } };
@@ -30,7 +31,7 @@ export default async function BookingSuccess({ searchParams }: { searchParams: P
   if (!booking) {
     return (
       <Shell title="Не намерихме тази резервация">
-        <p>Ако сте платили, ще получите имейл с потвърждение. При въпроси ни се обадете.</p>
+        <p>Ако сте платили, обадете ни се и ще проверим резервацията ви.</p>
       </Shell>
     );
   }
@@ -51,10 +52,11 @@ export default async function BookingSuccess({ searchParams }: { searchParams: P
   }
 
   return (
-    <Shell title="Часът ви е потвърден">
+    <Shell title={`Часът ви е потвърден (№ ${booking.number})`}>
       <p>
-        Очакваме {booking.dog_name} на {formatLongDate(booking.start_at)} в {formatTime(booking.start_at)}. Изпратихме
-        потвърждение на {booking.customer_email}.
+        Очакваме {booking.dog_name} на {formatLongDate(booking.start_at)} в {formatTime(booking.start_at)}. Запазете
+        номера на резервацията (№ {booking.number}) — тази страница е вашето потвърждение. При нужда ще се свържем с вас
+        на {booking.customer_phone}.
       </p>
       <dl className="mt-8 grid max-w-md grid-cols-2 gap-y-2 text-[15px]">
         <dt className="text-espresso-soft">Платено капаро</dt>
@@ -74,6 +76,7 @@ export default async function BookingSuccess({ searchParams }: { searchParams: P
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="container-page max-w-3xl pt-16">
+      <DogCutout dog="poodleGold" priority sizes="140px" className="mb-6 w-[140px]" />
       <h1 className="text-5xl">{title}</h1>
       <div className="mt-6 space-y-4 text-[15px] leading-7 text-espresso-soft">{children}</div>
       <div className="mt-10 flex flex-wrap gap-3">

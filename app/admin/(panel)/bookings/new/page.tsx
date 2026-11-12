@@ -11,7 +11,7 @@ export default async function NewBooking({ searchParams }: { searchParams: Promi
   const { data } = await db().from("services").select("*").eq("is_active", true).order("sort_order");
   return (
     <>
-      <PageHeader title="Ръчна резервация">Например при записване по телефона. Без плащане, статус „Потвърдена“.</PageHeader>
+      <PageHeader title="Ръчна резервация" back={{ href: "/admin/bookings", label: "Всички резервации" }}>Например при записване по телефона. Без плащане, статус „Потвърдена“.</PageHeader>
       <ManualBookingForm
         services={(data ?? []) as Service[]}
         defaultDate={sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : todaySofia()}

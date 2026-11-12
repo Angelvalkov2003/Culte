@@ -5,6 +5,7 @@ import { saveHours } from "@/app/admin/_actions/schedule";
 import { ActionForm, SubmitButton } from "@/components/admin/action-form";
 import { PageHeader, Panel } from "@/components/admin/ui";
 import { Input } from "@/components/ui/field";
+import { CheckboxBox } from "@/components/ui/checkbox";
 
 export const metadata = { title: "Работно време" };
 
@@ -24,12 +25,21 @@ export default async function HoursPage() {
           {order.map((d) => {
             const h = hours.find((x) => x.weekday === d) ?? DEFAULT_HOURS[d];
             return (
-              <div key={d} className="grid grid-cols-[110px_1fr_1fr_auto] items-center gap-3">
+              <div
+                key={d}
+                className="grid grid-cols-2 items-center gap-x-3 gap-y-2 border-b border-line/70 pb-3 last:border-0 sm:grid-cols-[110px_minmax(0,1fr)_minmax(0,1fr)_auto] sm:border-0 sm:pb-0"
+              >
                 <span className="text-sm font-medium">{WEEKDAY_LABEL[d]}</span>
-                <Input type="time" name={`open_${d}`} defaultValue={h.open_time} step={1800} aria-label={`${WEEKDAY_LABEL[d]} отваря`} />
-                <Input type="time" name={`close_${d}`} defaultValue={h.close_time} step={1800} aria-label={`${WEEKDAY_LABEL[d]} затваря`} />
-                <label className="flex items-center gap-2 text-sm">
-                  <input type="checkbox" name={`closed_${d}`} defaultChecked={h.is_closed} className="size-4 accent-terracotta" /> Почивен
+                <label className="flex items-center gap-2 justify-self-end text-sm sm:order-last">
+                  <CheckboxBox name={`closed_${d}`} defaultChecked={h.is_closed} /> Почивен
+                </label>
+                <label className="min-w-0 text-xs text-espresso-soft">
+                  <span className="mb-1 block sm:sr-only">Отваря</span>
+                  <Input type="time" name={`open_${d}`} defaultValue={h.open_time} step={1800} className="min-w-0" aria-label={`${WEEKDAY_LABEL[d]} отваря`} />
+                </label>
+                <label className="min-w-0 text-xs text-espresso-soft">
+                  <span className="mb-1 block sm:sr-only">Затваря</span>
+                  <Input type="time" name={`close_${d}`} defaultValue={h.close_time} step={1800} className="min-w-0" aria-label={`${WEEKDAY_LABEL[d]} затваря`} />
                 </label>
               </div>
             );

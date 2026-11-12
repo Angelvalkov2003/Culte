@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getBusinessHours, getSettings, groupHours } from "@/lib/settings";
 import { MapEmbed } from "@/components/site/map-embed";
+import { PopOut } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -8,6 +9,17 @@ export const metadata: Metadata = {
   description: "Адрес, телефон и работно време на груминг салон Culte в Пловдив.",
   alternates: { canonical: "/contact" },
 };
+
+/** „гр. Пловдив, ж.к. Оазис 3 / ул. Димитър Талев 144“ → „ул. Димитър Талев 144, Пловдив“ — Google го намира точно. */
+function mapQuery(address: string): string {
+  const street = address.split("/").pop()?.trim();
+  const city = /Пловдив/i.test(address) ? "Пловдив" : "";
+  return street && street !== address.trim() ? [street, city].filter(Boolean).join(", ") : address;
+}
+
+function directionsUrl(address: string): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery(address))}`;
+}
 
 export default async function ContactPage() {
   const [s, hours] = await Promise.all([getSettings(), getBusinessHours()]);
@@ -47,9 +59,10 @@ export default async function ContactPage() {
               <li><a href={s.tiktok_url} target="_blank" rel="noopener noreferrer" className="link-underline">TikTok</a></li>
             </ul>
           </div>
+          <PopOut dog="foam" tone="sand" className="max-w-[240px]" sizes="240px" />
         </div>
         <div className="md:col-span-8">
-          <MapEmbed query={s.address} />
+          <MapEmbed query={mapQuery(s.address)} address={s.address} href={directionsUrl(s.address)} />
         </div>
       </div>
     </div>

@@ -4,6 +4,8 @@ import { getCategories, getProducts } from "@/lib/shop/catalog";
 import { ButtonLink } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
 import { JsonLd, localBusinessJsonLd } from "@/components/site/json-ld";
+import { DogCutout, PopOut } from "@/components/site/dog-figure";
+import { cn } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -32,14 +34,14 @@ export default async function HomePage() {
         </p>
 
         <div className="mt-6 grid gap-3 md:grid-cols-2 md:gap-4">
-          <article className="relative flex min-h-[440px] flex-col justify-between rounded-lg bg-sand p-7 sm:min-h-[560px] sm:p-10">
-            <div>
+          <article className="relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-lg bg-sand p-7 pattern pattern-bones sm:min-h-[560px] sm:p-10">
+            <div className="relative z-10">
               <p className="text-sm text-olive">Груминг салон</p>
               <h2 className="mt-4 max-w-[12ch] text-[clamp(2.6rem,6vw,4.6rem)] text-espresso">
                 Запази час за груминг
               </h2>
             </div>
-            <div className="space-y-6">
+            <div className="relative z-10 space-y-6 lg:max-w-[15.5rem] xl:max-w-[17rem]">
               <p className="max-w-sm text-[15px] leading-7 text-espresso-soft">
                 Изберете размер, услуга и свободен час. Плащате онлайн половината, остатъка — в салона.
               </p>
@@ -55,16 +57,22 @@ export default async function HomePage() {
                 Запази час
               </ButtonLink>
             </div>
+            <DogCutout
+              dog="poodleGold"
+              priority
+              sizes="(min-width: 1280px) 290px, (min-width: 1024px) 230px, 220px"
+              className="-mb-7 mt-8 ml-auto w-[min(62%,220px)] animate-rise sm:-mb-10 lg:absolute lg:right-6 lg:bottom-0 lg:mb-0 lg:w-[42%] lg:max-w-[290px] xl:right-10"
+            />
           </article>
 
-          <article className="relative flex min-h-[440px] flex-col justify-between rounded-lg bg-espresso p-7 text-cream sm:min-h-[560px] sm:p-10">
-            <div>
+          <article className="relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-lg bg-espresso p-7 text-cream pattern pattern-grid pattern-light sm:min-h-[560px] sm:p-10">
+            <div className="relative z-10">
               <p className="text-sm text-clay">Онлайн магазин</p>
               <h2 className="mt-4 max-w-[12ch] text-[clamp(2.6rem,6vw,4.6rem)] text-cream">
                 Пазарувай козметика
               </h2>
             </div>
-            <div className="space-y-6">
+            <div className="relative z-10 space-y-6 lg:max-w-[15.5rem] xl:max-w-[17rem]">
               <p className="max-w-sm text-[15px] leading-7 text-cream/75">
                 Шампоани, балсами и аромати, които ползваме и препоръчваме. Доставка в цялата страна.
               </p>
@@ -83,6 +91,11 @@ export default async function HomePage() {
                 Към магазина
               </ButtonLink>
             </div>
+            <DogCutout
+              dog="poodleViolet"
+              sizes="(min-width: 1280px) 290px, (min-width: 1024px) 230px, 220px"
+              className="-mb-7 mt-8 ml-auto w-[min(62%,220px)] animate-rise [animation-delay:120ms] sm:-mb-10 lg:absolute lg:right-6 lg:bottom-0 lg:mb-0 lg:w-[42%] lg:max-w-[290px] xl:right-10 drop-shadow-[0_0_28px_rgba(244,235,222,0.22)]"
+            />
           </article>
         </div>
       </section>
@@ -120,8 +133,42 @@ export default async function HomePage() {
         </dl>
       </section>
 
+      {/* Един час в салона — визуален ритъм от изрязани снимки */}
+      <section aria-labelledby="ritual-title" className="container-page mt-28">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <p className="text-sm text-olive">Един час в Culte</p>
+            <h2 id="ritual-title" className="mt-3 max-w-[24ch] text-[clamp(2.2rem,4.5vw,3.4rem)]">
+              Без бързане. Без клетки. Само вашето куче.
+            </h2>
+          </div>
+          <Link href="/grooming" className="link-underline text-[15px]">
+            Услуги и цени
+          </Link>
+        </div>
+        <ol className="mt-14 grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-x-6">
+          {(
+            [
+              ["peach", "sand-deep", "Баня", "Шампоан и балсам според козината и кожата, с топла вода."],
+              ["puppy", "clay", "Подсушаване", "Внимателно и с почивки, ако кучето има нужда от тях."],
+              ["yorkieScissors", "sand-deep", "Подстригване", "По стандарта на породата или според начина ви на живот."],
+              ["shihtzu", "clay", "Финален щрих", "Разресване, последни корекции и съвет за грижа у дома."],
+            ] as const
+          ).map(([dog, tone, title, text], i) => (
+            <li key={title} className={cn("group", i % 2 === 1 && "lg:mt-12")}>
+              <PopOut dog={dog} tone={tone} sizes="(min-width: 1024px) 280px, 45vw" />
+              <div className="mt-5 flex items-baseline gap-3 border-t border-espresso/15 pt-4">
+                <span className="font-serif text-xl text-clay tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="font-sans text-base font-semibold">{title}</h3>
+              </div>
+              <p className="mt-1.5 text-[15px] leading-6 text-espresso-soft">{text}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {/* Как става записването — реална последователност */}
-      <section aria-labelledby="steps-title" className="mt-28 bg-sand py-20">
+      <section aria-labelledby="steps-title" className="mt-28 bg-sand py-20 pattern pattern-scatter">
         <div className="container-page grid gap-12 md:grid-cols-12">
           <div className="md:col-span-4">
             <h2 id="steps-title" className="text-4xl">
@@ -140,7 +187,7 @@ export default async function HomePage() {
               ["Размер и услуга", "Малка, средна или голяма порода и услугата, от която има нужда."],
               ["Ден и час", "Показваме само реално свободните часове в календара на салона."],
               ["Данни за кучето", "Име, порода и всичко, което трябва да знаем предварително."],
-              [`Капаро ${s.deposit_percent}%`, "Плащате сигурно с карта. Часът се потвърждава веднага по имейл."],
+              ["Капаро", "Плащате сигурно с карта. Часът се потвърждава веднага след плащането."],
             ].map(([title, text], i) => (
               <li key={title} className="border-t border-espresso/15 pt-4">
                 <p className="font-serif text-xl text-clay tabular-nums">{i + 1}</p>

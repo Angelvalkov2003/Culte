@@ -13,9 +13,11 @@ Next.js 16 (App Router, TS, Server Actions) · Tailwind 4 · Supabase · Stripe 
 - `app/api/stripe/webhook` — един webhook; `metadata.kind` = `booking` | `order`; идемпотентно чрез статуси + `stripe_events`
 - `lib/supabase/` — `admin.ts` (service role, само сървър, всички записи), `public.ts` (publishable ключ, само четене)
 - `lib/booking/` — свободни часове, създаване на резервация; `lib/shop/` — количка (cookie `culte_cart`), поръчки
-- `lib/shipping/` — интерфейс `ShippingProvider` (днес `manual`; място за Еконт/Спиди)
+- `lib/shipping/` — `speedy.ts` (API v1: sites/offices/calculate/shipment/print/track; тегло SPEEDY_WEIGHT_KG; офиси САМО по siteId, OFFICE/APT филтър локално), `boxnow.ts` (отделно, OAuth токен, публичен JSON с автомати, фиксирана цена BOXNOW_PRICE), `resolve.ts` (сървърно преизчисляване на доставката + проверка на тотала ±0.05), `speedy-orders.ts` (товарителница/синхронизация). Товарителници и синхронизация на статусите САМО от бутони в админа (без cron)
+- Услуги: групи `package/single/care`, `includes`, `deposit` на услуга (диапазон → 50% закръглено до 10 €) — `lib/booking/deposit.ts`
 - `emails/` — React Email шаблони; `lib/email.ts` праща през Resend
-- `supabase/schema.sql` — ЕДИН файл, пуска се ръчно в Supabase (агентът НЕ изпълнява SQL)
+- Правно: `/withdrawal` (функция за отказ, табл. `withdrawal_requests`), данни за търговеца в `settings.company_*` → `companyInfo()`; GPSR полета `products.manufacturer/safety_info`; cron `cleanup_stale_data()` (GDPR)
+- `supabase/schema.sql` — ЕДИНСТВЕН финален SQL: най-горе трие цялата база (таблици/функции/типове) и я създава наново със seed. Без отделни миграции — всяка промяна по схемата се прави в този файл и той се пуска целият отново (данните се губят). Пуска се ръчно (агентът НЕ изпълнява SQL)
 
 ## Конвенции
 - Цени в БД: `numeric(10,2)` EUR; към Stripe → центове. Формат `formatEUR()`.
@@ -27,7 +29,8 @@ Next.js 16 (App Router, TS, Server Actions) · Tailwind 4 · Supabase · Stripe 
 ## Env (имена; стойности само в `.env.local`, никога в код)
 NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY (fallback NEXT_PUBLIC_SUPABASE_ANON_KEY), SUPABASE_SERVICE_ROLE_KEY,
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, CLOUDINARY_URL, NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-RESEND_API_KEY, CONTACT_EMAIL, EMAIL_FROM, ADMIN_PASSWORD, ADMIN_SESSION_SECRET, NEXT_PUBLIC_SITE_URL, CRON_SECRET
+RESEND_API_KEY, CONTACT_EMAIL, EMAIL_FROM, EMAIL_TO_CUSTOMERS (празно = имейли само до собственика), ADMIN_PASSWORD, ADMIN_SESSION_SECRET, NEXT_PUBLIC_SITE_URL, CRON_SECRET,
+SPEEDY_USERNAME, SPEEDY_PASSWORD, SPEEDY_SENDER_PHONE/CONTACT_NAME/EMAIL, BOXNOW_ENV, BOXNOW_CLIENT_ID, BOXNOW_CLIENT_SECRET, BOXNOW_PARTNER_ID, BOXNOW_ORIGIN_ID, BOXNOW_PRICE, BOXNOW_SENDER_PHONE/EMAIL, BOXNOW_COMPARTMENT_SIZE
 
 ## Git
 Автор/commit имейл: angel4o2003@abv.bg · remote: github.com/Angelvalkov2003/Culte

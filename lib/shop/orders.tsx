@@ -1,6 +1,7 @@
 import "server-only";
 import type Stripe from "stripe";
 import { db } from "@/lib/supabase/admin";
+import { stripe } from "@/lib/stripe";
 import { adminEmail, sendEmail } from "@/lib/email";
 import type { Order, OrderStatus } from "@/lib/types";
 import { OrderAdminEmail, OrderConfirmationEmail, OrderShippedEmail, StockIssueEmail } from "@/emails/order-emails";
@@ -62,6 +63,23 @@ export async function completeOrderFromSession(session: Stripe.Checkout.Session)
       });
   }
   return order;
+}
+
+/** Връщане на платената с карта сума през Stripe Refunds API. Идемпотентно. */
+export async function refundOrder(orderId: string): Promise<boolean> {
+  const order = await getOrder(orderId);
+  if (!order) throw new Error("Поръчката не е намерена");
+  if (order.refund_id) return false;
+  if (order.payment_method !== "stripe" || !order.paid_at || !order.stripe_payment_intent_id) {
+    throw new Error("Няма плащане с карта за връщане (при наложен платеж върнете сумата по банков път).");
+  }
+  const r = await stripe().refunds.create(
+    { payment_intent: order.stripe_payment_intent_id },
+    { idempotencyKey: `order-refund-${order.id}` },
+  );
+  const { error } = await db().from("orders").update({ refund_id: r.id, refunded_at: new Date().toISOString() }).eq("id", orderId);
+  if (error) throw new Error(error.message);
+  return true;
 }
 
 export async function expireOrder(orderId: string) {

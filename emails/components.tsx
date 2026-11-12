@@ -1,4 +1,4 @@
-import { Body, Container, Head, Heading, Hr, Html, Img, Link, Preview, Section, Text } from "@react-email/components";
+import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from "@react-email/components";
 import type { ReactNode } from "react";
 
 const site = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -19,8 +19,10 @@ export function EmailLayout({ preview, title, children }: { preview: string; tit
       <Preview>{preview}</Preview>
       <Body style={{ backgroundColor: c.sand, margin: 0, padding: "24px 0", fontFamily: "Helvetica, Arial, sans-serif" }}>
         <Container style={{ maxWidth: 560, backgroundColor: c.cream, borderRadius: 6, overflow: "hidden" }}>
-          <Section style={{ backgroundColor: "#000000", padding: "20px 0", textAlign: "center" }}>
-            <Img src={`${site}/logo.png`} alt="Culte" width="150" style={{ margin: "0 auto" }} />
+          <Section style={{ backgroundColor: c.espresso, padding: "22px 0", textAlign: "center" }}>
+            <Text style={{ fontFamily: "Georgia, serif", fontSize: 30, lineHeight: "34px", letterSpacing: "0.08em", color: c.cream, margin: 0 }}>
+              CULTE
+            </Text>
           </Section>
           <Section style={{ padding: "32px 32px 8px" }}>
             <Heading
