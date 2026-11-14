@@ -29,7 +29,7 @@ export default async function HomePage() {
           Culte — груминг салон и козметика за кучета
         </h1>
         <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-          <article className="relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-lg bg-sand p-7 pattern pattern-bones sm:min-h-[560px] sm:p-10">
+          <article className="relative flex min-h-[440px] flex-col justify-between gap-8 overflow-hidden rounded-lg bg-sand p-7 pattern pattern-bones sm:min-h-[560px] sm:p-10">
             <div className="relative z-10">
               <p className="text-sm text-olive">Груминг салон</p>
               <h2 className="mt-4 max-w-[12ch] text-[clamp(2.6rem,6vw,4.6rem)] text-espresso">
@@ -37,9 +37,6 @@ export default async function HomePage() {
               </h2>
             </div>
             <div className="relative z-10 space-y-6 lg:max-w-[15.5rem] xl:max-w-[17rem]">
-              <p className="max-w-sm text-[15px] leading-7 text-espresso-soft">
-                Изберете размер, услуга и свободен час. Плащате онлайн половината, остатъка — в салона.
-              </p>
               <dl className="grid max-w-sm grid-cols-2 gap-y-1 text-sm text-espresso-soft">
                 {hoursText.map((h) => (
                   <div key={h.label} className="contents">
@@ -60,11 +57,11 @@ export default async function HomePage() {
             />
           </article>
 
-          <article className="relative flex min-h-[440px] flex-col justify-between overflow-hidden rounded-lg bg-espresso p-7 text-cream pattern pattern-grid pattern-light sm:min-h-[560px] sm:p-10">
+          <article className="relative flex min-h-[440px] flex-col justify-between gap-8 overflow-hidden rounded-lg bg-espresso p-7 text-cream pattern pattern-grid pattern-light sm:min-h-[560px] sm:p-10">
             <div className="relative z-10">
               <p className="text-sm text-clay">Онлайн магазин</p>
-              <h2 className="mt-4 max-w-[12ch] text-[clamp(2.6rem,6vw,4.6rem)] text-cream">
-                Пазарувай козметика
+              <h2 className="mt-4 max-w-[13ch] text-[clamp(2.4rem,5vw,4.2rem)] leading-[1.05] text-cream">
+                Пазарувай козметика и парфюми
               </h2>
             </div>
             <div className="relative z-10 space-y-6 lg:max-w-[15.5rem] xl:max-w-[17rem]">
@@ -152,35 +149,36 @@ export default async function HomePage() {
         </ol>
       </section>
 
-      {/* Как става записването — реална последователност */}
-      <section aria-labelledby="steps-title" className="mt-28 bg-sand py-20 pattern pattern-scatter">
-        <div className="container-page grid gap-12 md:grid-cols-12">
-          <div data-reveal className="md:col-span-4">
-            <h2 id="steps-title" className="text-4xl">
-              Записването отнема две минути
+      {/* Записване — онлайн или по телефона */}
+      <section aria-labelledby="steps-title" className="mt-28 bg-sand py-20 pattern pattern-scatter md:py-24">
+        <div className="container-page grid items-end gap-12 md:grid-cols-12">
+          <div data-reveal className="md:col-span-7">
+            <h2 id="steps-title" className="text-[clamp(2.4rem,5vw,3.8rem)] leading-[1.05]">
+              Запиши час
+              <span className="block font-normal text-terracotta italic">лесно и удобно.</span>
             </h2>
-            <p className="mt-4 text-[15px] leading-7 text-espresso-soft">
-              Капарото пази часа само за вас. Ако нещо се промени, обадете ни се на{" "}
-              <a href={`tel:${s.phone.replace(/\s+/g, "")}`} className="link-underline text-espresso">
-                {s.phone}
-              </a>
-              .
+            <p className="mt-6 max-w-[46ch] text-[15px] leading-7 text-espresso-soft">
+              Ако нещо се промени, ще сме ви благодарни да ни предупредите поне 48 часа по-рано.
             </p>
           </div>
-          <ol className="grid gap-x-10 gap-y-8 sm:grid-cols-2 md:col-span-7 md:col-start-6">
-            {[
-              ["Размер и услуга", "Малка, средна или голяма порода и услугата, от която има нужда."],
-              ["Ден и час", "Показваме само реално свободните часове в календара на салона."],
-              ["Данни за кучето", "Име, порода и всичко, което трябва да знаем предварително."],
-              ["Капаро", "Плащате сигурно с карта. Часът се потвърждава веднага след плащането."],
-            ].map(([title, text], i) => (
-              <li key={title} data-reveal className="border-t border-espresso/15 pt-4">
-                <p className="font-serif text-xl text-clay tabular-nums">{i + 1}</p>
-                <h3 className="mt-1 font-sans text-base font-semibold">{title}</h3>
-                <p className="mt-1.5 text-[15px] leading-6 text-espresso-soft">{text}</p>
-              </li>
-            ))}
-          </ol>
+
+          <div data-reveal className="[--reveal-delay:120ms] md:col-span-4 md:col-start-9">
+            <ButtonLink href="/booking" size="lg" className="w-full">
+              Запази час онлайн
+            </ButtonLink>
+            <div className="my-6 flex items-center gap-4 text-sm text-espresso-soft" aria-hidden>
+              <span className="h-px flex-1 bg-espresso/15" />
+              или
+              <span className="h-px flex-1 bg-espresso/15" />
+            </div>
+            <p className="text-sm text-espresso-soft">Обадете се</p>
+            <a
+              href={`tel:${s.phone.replace(/\s+/g, "")}`}
+              className="mt-1 block font-serif text-[2rem] leading-tight lining-nums text-espresso transition-colors hover:text-terracotta"
+            >
+              {s.phone}
+            </a>
+          </div>
         </div>
       </section>
 
@@ -188,9 +186,12 @@ export default async function HomePage() {
       {featured.length > 0 && (
         <section aria-labelledby="shop-title" className="container-page mt-28">
           <div data-reveal className="flex flex-wrap items-end justify-between gap-4">
-            <h2 id="shop-title" className="max-w-lg text-4xl">
-              От рафта в салона до вашата баня
-            </h2>
+            <div>
+              <p className="text-sm text-olive">Разгледайте нашите професионални продукти</p>
+              <h2 id="shop-title" className="mt-3 max-w-lg text-4xl">
+                От рафта в салона до вашата баня
+              </h2>
+            </div>
             <Link href="/shop" className="link-underline text-[15px]">
               Всички продукти
             </Link>

@@ -21,10 +21,9 @@ export default async function CartPage() {
         <div className="group mt-10 grid max-w-3xl items-end gap-8 sm:grid-cols-[220px_1fr]">
           <PopOut dog="blue" tone="sand" className="w-[220px]" sizes="220px" />
           <div className="pb-2">
-            <p className="font-serif text-3xl">Тук е празно засега</p>
-            <p className="mt-2 text-[15px] text-espresso-soft">Разгледайте козметиката, която ползваме в салона.</p>
+            <p className="font-serif text-3xl">Количката ви е празна.</p>
             <ButtonLink href="/shop" className="mt-6">
-              Към магазина
+              Върни се към магазина
             </ButtonLink>
           </div>
         </div>

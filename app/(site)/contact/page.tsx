@@ -38,7 +38,7 @@ export default async function ContactPage() {
           </div>
           <div>
             <h2 className="font-sans text-sm font-semibold">Телефон</h2>
-            <a href={`tel:${tel}`} className="mt-2 block font-serif text-3xl hover:text-terracotta">{s.phone}</a>
+            <a href={`tel:${tel}`} className="mt-2 block font-serif text-3xl lining-nums tabular-nums hover:text-terracotta">{s.phone}</a>
           </div>
           <div>
             <h2 className="font-sans text-sm font-semibold">Работно време</h2>

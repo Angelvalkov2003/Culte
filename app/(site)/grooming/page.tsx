@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { getActiveServices } from "@/lib/booking/services";
 import { getBusinessHours, getSettings, groupHours, listBG } from "@/lib/settings";
 import { formatDuration, formatEUR, formatRange } from "@/lib/format";
-import { DOG_SIZES, EXTRA_FEES, PRICE_NOTE, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL } from "@/lib/types";
+import { DOG_SIZES, EXTRA_FEES, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type Service } from "@/lib/types";
 import { serviceDeposit } from "@/lib/booking/deposit";
 import { ButtonLink } from "@/components/ui/button";
-import { PopOut } from "@/components/site/dog-figure";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -18,22 +18,61 @@ export const metadata: Metadata = {
 
 export default async function GroomingPage() {
   const [services, s, hours] = await Promise.all([getActiveServices(), getSettings(), getBusinessHours()]);
+  // Допълнителните услуги се повтарят за всеки размер — показваме ги веднъж, с диапазон на цената, ако се различава.
+  const extras = [...services.filter((x) => x.group_name === "extra").reduce((m, x) => {
+    const prev = m.get(x.name);
+    m.set(x.name, prev ? {
+      ...prev,
+      price_from: Math.min(Number(prev.price_from), Number(x.price_from)),
+      price_to: Math.max(Number(prev.price_to), Number(x.price_to)),
+    } : x);
+    return m;
+  }, new Map<string, Service>()).values()];
   
   return (
-    <div className="container-page pt-12">
+    <div className="container-page pt-12 pb-8">
       <header className="grid gap-8 md:grid-cols-12">
         <div className="md:col-span-7">
-          <h1 className="animate-rise text-[clamp(2.6rem,6vw,4.4rem)]">Груминг, който кучето ви ще понесе спокойно</h1>
-          <p className="prose-culte mt-6">
-            {listBG(s.team)} {s.team.length > 1 ? "работят" : "работи"} с всяко куче поотделно, с козметика {listBG(s.cosmetics)}. Преди да започнем,
-            питаме за навиците и чувствителните места, а след това подстригваме по породата и по начина ви на живот.
+          <h1 className="animate-rise text-[clamp(2.4rem,4.6vw,4rem)] leading-[1.05] text-balance">
+            Красотата е в детайла.
+            <span className="mt-1 block font-normal text-terracotta italic">Грижата – в отношението.</span>
+          </h1>
+
+          <p className="mt-8 max-w-[52ch] text-[17px] leading-8 text-espresso">
+            Всяко куче е различно. Затова вярваме, че истински добрият груминг започва не с ножицата, а с внимание,
+            разбиране и индивидуален подход.
           </p>
-          <ButtonLink href="/booking" size="lg" className="mt-8">
+
+          <div className="mt-8 grid max-w-[60ch] gap-5 border-l border-clay/60 pl-5 text-[15px] leading-7 text-espresso-soft sm:pl-6">
+            <p>
+              Аз съм <span className="font-serif text-[1.35em] leading-none text-espresso italic">Стефани</span> и ще се
+              погрижа за Вашия любимец с професионализъм, прецизност и висок клас козметика от{" "}
+              <span className="text-espresso">{listBG(s.cosmetics)}</span>.
+            </p>
+            <p>
+              От първото разресване до последния детайл – всяка стъпка е съобразена с нуждите на козината, кожата и
+              характера на Вашето куче.
+            </p>
+          </div>
+
+          <p className="mt-8 max-w-[34ch] font-serif text-[1.6rem] leading-snug text-espresso italic">
+            Защото грижата не е просто услуга. Тя е отношение.
+          </p>
+
+          <ButtonLink href="/booking" size="lg" className="mt-9">
             Запази час
           </ButtonLink>
         </div>
         <div className="group self-end md:col-span-4 md:col-start-9">
-          <PopOut dog="yorkieScissors" tone="clay" priority className="mx-auto max-w-[300px] md:mx-0 md:max-w-none" sizes="(min-width: 768px) 360px, 300px" />
+          <Image
+            src="/salon-logo.png"
+            alt="Animal House — груминг салон"
+            width={537}
+            height={465}
+            priority
+            sizes="(min-width: 768px) 400px, 280px"
+            className="mx-auto h-auto w-full max-w-[280px] md:mx-0 md:max-w-none"
+          />
           <dl className="mt-6 space-y-2 text-[15px]">
             {groupHours(hours).map((h) => (
               <div key={h.label} className="flex justify-between gap-4 border-b border-line py-2">
@@ -48,7 +87,7 @@ export default async function GroomingPage() {
 
       <div className="mt-20 space-y-20">
         {DOG_SIZES.map((size) => {
-          const list = services.filter((x) => x.size === size);
+          const list = services.filter((x) => x.size === size && x.group_name !== "extra");
           if (!list.length) return null;
           return (
             <section key={size} data-reveal aria-labelledby={`size-${size}`} className="grid gap-6 md:grid-cols-12">
@@ -66,31 +105,13 @@ export default async function GroomingPage() {
                       <th scope="col" className="py-2 text-right font-normal">Цена</th>
                     </tr>
                   </thead>
-                  {SERVICE_GROUPS.map((g) => {
+                  {SERVICE_GROUPS.filter((g) => g !== "extra").map((g) => {
                     const rows = list.filter((x) => x.group_name === g);
                     if (!rows.length) return null;
                     return (
                   <tbody key={g}>
                     <tr><th colSpan={3} scope="rowgroup" className="pt-6 pb-1 text-left text-sm font-semibold">{SERVICE_GROUP_LABEL[g]}</th></tr>
-                    {rows.map((x) => (
-                      <tr key={x.id} className="border-b border-line align-top">
-                        <td className="py-3.5 pr-4">
-                          <span className="font-medium">{x.name}</span>
-                          {x.description && <span className="mt-0.5 block text-sm text-espresso-soft">{x.description}</span>}
-                          {x.includes && <span className="mt-1 block text-sm"><span className="text-espresso-soft">Включва: </span>{x.includes}</span>}
-                          <span className="mt-0.5 block text-sm text-espresso-soft sm:hidden">
-                            {formatDuration(x.duration_min, x.duration_max)}
-                          </span>
-                        </td>
-                        <td className="hidden py-3.5 pr-4 whitespace-nowrap text-espresso-soft sm:table-cell">
-                          {formatDuration(x.duration_min, x.duration_max)}
-                        </td>
-                        <td className="py-3.5 text-right whitespace-nowrap tabular-nums">
-                          {formatRange(x.price_from, x.price_to)}
-                          <span className="block text-xs text-espresso-soft">капаро {formatEUR(serviceDeposit(x, s.deposit_percent))}</span>
-                        </td>
-                      </tr>
-                    ))}
+                    {rows.map((x) => <ServiceRow key={x.id} x={x} depositPercent={s.deposit_percent} />)}
                   </tbody>
                     );
                   })}
@@ -101,27 +122,51 @@ export default async function GroomingPage() {
         })}
       </div>
 
-      <section data-reveal aria-labelledby="fees-title" className="mt-20 grid gap-6 md:grid-cols-12">
-        <h2 id="fees-title" className="text-4xl md:col-span-3">
-          Такси и котки
-          <span className="mt-2 block font-sans text-[15px] font-medium text-espresso-soft">Не се записват онлайн</span>
-        </h2>
-        <ul className="text-[15px] md:col-span-9">
-          {EXTRA_FEES.map((f) => (
-            <li key={f.name} className="flex items-baseline justify-between gap-4 border-b border-line py-3.5">
-              <span>
-                <span className="font-medium">{f.name}</span>
-                {f.note && <span className="text-espresso-soft"> · {f.note}</span>}
-              </span>
-              <span className="whitespace-nowrap tabular-nums">{f.price}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <section data-reveal aria-labelledby="extras-title" className="mt-20 grid gap-6 md:grid-cols-12">
+          <h2 id="extras-title" className="text-4xl md:col-span-3">
+            {SERVICE_GROUP_LABEL.extra}
+            <span className="mt-2 block font-sans text-[15px] font-medium text-espresso-soft">За всеки размер</span>
+          </h2>
+          <div className="md:col-span-9">
+            <table className="w-full text-left text-[15px]">
+              <caption className="sr-only">{SERVICE_GROUP_LABEL.extra}</caption>
+              <tbody>
+                {extras.map((x) => <ServiceRow key={x.id} x={x} depositPercent={s.deposit_percent} />)}
+                {EXTRA_FEES.map((fee) => (
+                  <tr key={fee.name} className="border-b border-line align-top">
+                    <td className="py-3.5 pr-4">
+                      <span className="font-medium">{fee.name}</span>
+                      {fee.note && <span className="mt-0.5 block text-sm text-espresso-soft">{fee.note[0].toUpperCase() + fee.note.slice(1)}</span>}
+                    </td>
+                    <td className="hidden sm:table-cell" />
+                    <td className="py-3.5 text-right whitespace-nowrap tabular-nums">{fee.price}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-      <p className="mt-12 max-w-2xl text-sm leading-6 text-espresso-soft">
-        {PRICE_NOTE} Телефон: {s.phone}. При онлайн записване се плаща посоченото капаро, остатъкът — в салона.
-      </p>
     </div>
+  );
+}
+
+function ServiceRow({ x, depositPercent }: { x: Service; depositPercent: number }) {
+  return (
+    <tr className="border-b border-line align-top">
+      <td className="py-3.5 pr-4">
+        <span className="font-medium">{x.name}</span>
+        {x.description && <span className="mt-0.5 block text-sm text-espresso-soft">{x.description}</span>}
+        {x.includes && <span className="mt-1 block text-sm"><span className="text-espresso-soft">Включва: </span>{x.includes}</span>}
+        <span className="mt-0.5 block text-sm text-espresso-soft sm:hidden">{formatDuration(x.duration_min, x.duration_max)}</span>
+      </td>
+      <td className="hidden py-3.5 pr-4 whitespace-nowrap text-espresso-soft sm:table-cell">
+        {formatDuration(x.duration_min, x.duration_max)}
+      </td>
+      <td className="py-3.5 text-right whitespace-nowrap tabular-nums">
+        {formatRange(x.price_from, x.price_to)}
+        <span className="block text-xs text-espresso-soft">капаро {formatEUR(serviceDeposit(x, depositPercent))}</span>
+      </td>
+    </tr>
   );
 }

@@ -178,7 +178,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
 
   return (
     <div className="grid gap-10 lg:grid-cols-12">
-      <div ref={rootRef} className="lg:col-span-8">
+      <div ref={rootRef} className={chosen.length > 0 ? "lg:col-span-8" : "lg:col-span-12"}>
         <ol className="flex flex-wrap gap-x-6 gap-y-2 border-b border-line pb-4 text-sm" aria-label="Стъпки">
           {STEPS.map((label, i) => (
             <li key={label} aria-current={i === step ? "step" : undefined}>
@@ -486,12 +486,11 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
         </div>
       </div>
 
-      <aside className="lg:col-span-4" aria-label="Обобщение">
-        <div className="sticky top-24 rounded-lg border border-line bg-white/50 p-5">
+      {chosen.length > 0 && size && (
+      <aside className="animate-rise lg:col-span-4 [animation-duration:450ms]" aria-label="Обобщение">
+        <div className="sticky top-24 rounded-lg border border-line bg-white/50 p-5 lg:top-32">
           <h2 className="font-sans text-sm font-semibold">Вашият час</h2>
-          {!size ? (
-            <p className="mt-3 text-sm text-espresso-soft">Изберете размер, за да видите услугите и цените.</p>
-          ) : (
+          {(
             <div className="mt-3 space-y-4 text-sm">
               <p>{SIZE_LABEL[size]}</p>
               {chosen.length > 0 && (
@@ -521,6 +520,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
           )}
         </div>
       </aside>
+      )}
     </div>
   );
 }

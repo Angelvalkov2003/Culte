@@ -162,7 +162,7 @@ export function MobileMenu({
             </ul>
           )}
           {contacts.phone && (
-            <a href={`tel:${contacts.phone.replace(/\s+/g, "")}`} className="mt-5 block font-serif text-2xl text-cream/90">
+            <a href={`tel:${contacts.phone.replace(/\s+/g, "")}`} className="mt-5 block font-serif text-2xl lining-nums text-cream/90">
               {contacts.phone}
             </a>
           )}
