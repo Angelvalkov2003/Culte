@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getActiveServices } from "@/lib/booking/services";
-import { getBusinessHours, getSettings, groupHours } from "@/lib/settings";
+import { getBusinessHours, getSettings, groupHours, listBG } from "@/lib/settings";
 import { formatDuration, formatEUR, formatRange } from "@/lib/format";
-import { PRICE_NOTE, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type ServiceGroup } from "@/lib/types";
+import { DOG_SIZES, EXTRA_FEES, PRICE_NOTE, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL } from "@/lib/types";
 import { serviceDeposit } from "@/lib/booking/deposit";
 import { ButtonLink } from "@/components/ui/button";
 import { PopOut } from "@/components/site/dog-figure";
@@ -12,21 +12,20 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Груминг салон в Пловдив — услуги и цени",
   description:
-    "Цялостен груминг, подстригване, къпане, спа баня и зъбна хигиена за малки, средни и големи породи. Цени и продължителност.",
+    "Породен груминг за пудели, йоркширски териери, ши тцу, померани и др., цялостен груминг по килограми и допълнителни услуги. Цени и продължителност.",
   alternates: { canonical: "/grooming" },
 };
 
 export default async function GroomingPage() {
   const [services, s, hours] = await Promise.all([getActiveServices(), getSettings(), getBusinessHours()]);
-  const sizes: DogSize[] = ["small", "medium", "large"];
-
+  
   return (
     <div className="container-page pt-12">
       <header className="grid gap-8 md:grid-cols-12">
         <div className="md:col-span-7">
           <h1 className="animate-rise text-[clamp(2.6rem,6vw,4.4rem)]">Груминг, който кучето ви ще понесе спокойно</h1>
           <p className="prose-culte mt-6">
-            {s.team.join(" и ")} работят с всяко куче поотделно, с козметика {s.cosmetics.join(" и ")}. Преди да започнем,
+            {listBG(s.team)} {s.team.length > 1 ? "работят" : "работи"} с всяко куче поотделно, с козметика {listBG(s.cosmetics)}. Преди да започнем,
             питаме за навиците и чувствителните места, а след това подстригваме по породата и по начина ви на живот.
           </p>
           <ButtonLink href="/booking" size="lg" className="mt-8">
@@ -48,7 +47,7 @@ export default async function GroomingPage() {
       </header>
 
       <div className="mt-20 space-y-20">
-        {sizes.map((size) => {
+        {DOG_SIZES.map((size) => {
           const list = services.filter((x) => x.size === size);
           if (!list.length) return null;
           return (
@@ -67,7 +66,7 @@ export default async function GroomingPage() {
                       <th scope="col" className="py-2 text-right font-normal">Цена</th>
                     </tr>
                   </thead>
-                  {(["package", "single", "care"] as ServiceGroup[]).map((g) => {
+                  {SERVICE_GROUPS.map((g) => {
                     const rows = list.filter((x) => x.group_name === g);
                     if (!rows.length) return null;
                     return (
@@ -101,6 +100,24 @@ export default async function GroomingPage() {
           );
         })}
       </div>
+
+      <section data-reveal aria-labelledby="fees-title" className="mt-20 grid gap-6 md:grid-cols-12">
+        <h2 id="fees-title" className="text-4xl md:col-span-3">
+          Такси и котки
+          <span className="mt-2 block font-sans text-[15px] font-medium text-espresso-soft">Не се записват онлайн</span>
+        </h2>
+        <ul className="text-[15px] md:col-span-9">
+          {EXTRA_FEES.map((f) => (
+            <li key={f.name} className="flex items-baseline justify-between gap-4 border-b border-line py-3.5">
+              <span>
+                <span className="font-medium">{f.name}</span>
+                {f.note && <span className="text-espresso-soft"> · {f.note}</span>}
+              </span>
+              <span className="whitespace-nowrap tabular-nums">{f.price}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <p className="mt-12 max-w-2xl text-sm leading-6 text-espresso-soft">
         {PRICE_NOTE} Телефон: {s.phone}. При онлайн записване се плаща посоченото капаро, остатъкът — в салона.

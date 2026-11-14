@@ -7,19 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, formatDuration, formatEUR, formatMinutes, formatRange } from "@/lib/format";
-import { PRICE_NOTE, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type Service, type ServiceGroup } from "@/lib/types";
+import { DOG_SIZES, PRICE_NOTE, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
 import { isRangePrice, serviceDeposit } from "@/lib/booking/deposit";
 import { BookingCalendar } from "@/components/booking/booking-calendar";
 import { revealFirstError, scrollToTop } from "@/lib/scroll";
 
-const STEPS = ["Размер", "Услуги", "Дата и час", "Вашите данни", "Плащане"];
+const STEPS = ["Размер", "Услуга", "Допълнителни", "Дата и час", "Вашите данни", "Плащане"];
 
 const SIZE_BREEDS: Record<DogSize, string> = {
-  small: "Йоркширски териер, малтезе, чихуахуа, той пудел, померан",
-  medium: "Ши-тцу, бишон, малтипу, кавалер кинг чарлз, мини пудел",
-  large: "Кокер шпаньол, бигъл, голдън ретривър, лабрадор, хъски",
+  small: "Той пудел, йоркширски териер, померан, пикинес, ши тцу",
+  medium: "Мини и среден пудел, малтипу, болонка, шнауцер, кокер шпаньол",
+  large: "Стандартен пудел, бигъл, бордър коли, самоед",
 };
-const GROUPS: ServiceGroup[] = ["package", "single", "care"];
+const GROUPS = SERVICE_GROUPS;
 
 function ServiceInfo({ s }: { s: Service }) {
   return (
@@ -91,7 +91,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
   const servicesKey = `${size}|${mainId}|${addonIds.join(",")}`;
 
   useEffect(() => {
-    if (step !== 2 || !size || !mainId) return;
+    if (step !== 3 || !size || !mainId) return;
     const ctrl = new AbortController();
     const params = new URLSearchParams({ size, main: mainId, addons: addonIds.join(",") });
     // eslint-disable-next-line react-hooks/set-state-in-effect -- зареждане на данни при смяна на стъпката
@@ -126,6 +126,15 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
     setStep(1);
   }
 
+  function chooseMain(id: string) {
+    if (id !== mainId) {
+      setMainId(id);
+      setAddonIds((ids) => ids.filter((x) => x !== id));
+      setTime(null);
+    }
+    setStep(2);
+  }
+
   function toggleAddon(id: string) {
     setAddonIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]));
     setTime(null);
@@ -156,16 +165,16 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
       revealFirstError(rootRef.current);
       if (res.fieldErrors) {
         setErrors(res.fieldErrors);
-        if (["name", "email", "phone", "dogName", "dogBreed", "terms"].some((k) => res.fieldErrors?.[k])) setStep(3);
+        if (["name", "email", "phone", "dogName", "dogBreed", "terms"].some((k) => res.fieldErrors?.[k])) setStep(4);
       }
       if (/час/.test(res.error)) {
         setTime(null);
-        setStep(2);
+        setStep(3);
       }
     });
   }
 
-  const canNext = [Boolean(size), Boolean(mainId), Boolean(date && time), true, true][step];
+  const canNext = [Boolean(size), Boolean(mainId), true, Boolean(date && time), true, true][step];
 
   return (
     <div className="grid gap-10 lg:grid-cols-12">
@@ -193,7 +202,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
             <fieldset>
               <legend className="font-serif text-3xl">Колко е голямо кучето ви?</legend>
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                {(["small", "medium", "large"] as DogSize[]).map((s) => (
+                {DOG_SIZES.map((s) => (
                   <button
                     key={s}
                     type="button"
@@ -229,20 +238,22 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                     <legend className="font-sans text-sm font-semibold">{SERVICE_GROUP_LABEL[g]}</legend>
                     <div className="mt-3 divide-y divide-line border-y border-line">
                       {list.map((s) => (
-                        <label
+                        <button
                           key={s.id}
-                          className={cn("flex cursor-pointer items-start gap-4 px-1 py-4 transition-colors", mainId === s.id && "bg-sand/60")}
+                          type="button"
+                          onClick={() => chooseMain(s.id)}
+                          aria-pressed={mainId === s.id}
+                          className={cn(
+                            "flex w-full items-start gap-4 px-1 py-4 text-left transition-colors hover:bg-sand/40",
+                            mainId === s.id && "bg-sand/60",
+                          )}
                         >
-                          <input
-                            type="radio"
-                            name="main"
-                            className="mt-1.5 size-4 accent-terracotta"
-                            checked={mainId === s.id}
-                            onChange={() => {
-                              setMainId(s.id);
-                              setAddonIds((ids) => ids.filter((x) => x !== s.id));
-                              setTime(null);
-                            }}
+                          <span
+                            aria-hidden
+                            className={cn(
+                              "mt-1.5 size-4 shrink-0 rounded-full border",
+                              mainId === s.id ? "border-[5px] border-terracotta" : "border-espresso/30",
+                            )}
                           />
                           <ServiceInfo s={s} />
                           <span className="shrink-0 text-right text-sm">
@@ -250,16 +261,30 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                             <span className="block text-espresso-soft">{formatDuration(s.duration_min, s.duration_max)}</span>
                             <span className="mt-1 block text-espresso-soft">капаро {formatEUR(serviceDeposit(s, depositPercent))}</span>
                           </span>
-                        </label>
+                        </button>
                       ))}
                     </div>
                   </fieldset>
                 );
               })}
+            </div>
+          )}
 
-              {main && extras.length > 0 && (
+          {step === 2 && main && (
+            <div className="space-y-8">
+              <div>
+                <h2 className="font-serif text-3xl">Искате ли да добавите нещо?</h2>
+                <p className="mt-2 text-[15px] text-espresso-soft">
+                  Избрахте <span className="font-medium text-espresso">{main.name}</span>.{" "}
+                  <button type="button" onClick={() => setStep(1)} className="link-underline text-espresso">
+                    Смени
+                  </button>
+                </p>
+              </div>
+
+              {extras.length > 0 ? (
                 <fieldset>
-                  <legend className="font-serif text-2xl">Допълнително, по желание</legend>
+                  <legend className="font-sans text-sm font-semibold">Допълнителни услуги, по желание</legend>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     {extras.map((s) => (
                       <label
@@ -285,11 +310,13 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                     ))}
                   </div>
                 </fieldset>
+              ) : (
+                <p className="text-[15px] text-espresso-soft">Няма допълнителни услуги към тази. Продължете към избора на час.</p>
               )}
             </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <div>
               <h2 className="font-serif text-3xl">Изберете ден и час</h2>
               <p className="mt-2 text-[15px] text-espresso-soft">
@@ -351,12 +378,12 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <form
               noValidate
               onSubmit={(e) => {
                 e.preventDefault();
-                if (validateForm()) setStep(4);
+                if (validateForm()) setStep(5);
                 else revealFirstError(rootRef.current);
               }}
               className="space-y-5"
@@ -404,7 +431,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
             </form>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div>
               <h2 className="font-serif text-3xl">Преглед и капаро</h2>
               <dl className="mt-6 grid gap-x-8 gap-y-3 text-[15px] sm:grid-cols-[10rem_1fr]">
@@ -437,12 +464,12 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
             </div>
           )}
 
-          {step < 4 && step > 0 && (
+          {step < 5 && step > 0 && (
             <div className="mt-10 flex items-center justify-between gap-4 border-t border-line pt-6">
               <Button type="button" variant="ghost" onClick={() => setStep(step - 1)}>
                 Назад
               </Button>
-              {step === 3 ? (
+              {step === 4 ? (
                 <Button type="submit" form="details-form">Продължи към плащане</Button>
               ) : (
                 <Button type="button" disabled={!canNext} onClick={() => setStep(step + 1)}>
@@ -451,8 +478,8 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
               )}
             </div>
           )}
-          {step === 4 && (
-            <Button type="button" variant="ghost" className="mt-4" onClick={() => setStep(3)}>
+          {step === 5 && (
+            <Button type="button" variant="ghost" className="mt-4" onClick={() => setStep(4)}>
               Назад
             </Button>
           )}

@@ -17,7 +17,7 @@ export async function Footer() {
     <footer className="mt-24 bg-espresso text-cream/85 pattern pattern-bones pattern-light">
       <div className="container-page grid gap-12 py-16 md:grid-cols-12">
         <div className="md:col-span-4">
-          <Image src="/logo-nobg.png" alt="Culte" width={610} height={410} className="h-20 w-auto" />
+          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} className="h-20 w-auto" />
           <p className="mt-6 max-w-xs font-serif text-2xl leading-snug text-cream">{s.slogan}</p>
         </div>
 

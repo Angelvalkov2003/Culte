@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/lib/supabase/admin";
-import type { Service } from "@/lib/types";
+import { DOG_SIZES, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type Service } from "@/lib/types";
 import { deleteService, saveService } from "@/app/admin/_actions/services";
 import { ActionForm, SubmitButton } from "@/components/admin/action-form";
 import { PageHeader } from "@/components/admin/ui";
@@ -28,9 +28,7 @@ export default async function ServiceEdit({ params }: { params: Promise<{ id: st
           </Field>
           <Field label="Размер" htmlFor="size">
             <Select id="size" name="size" defaultValue={s?.size ?? "small"}>
-              <option value="small">Малка порода</option>
-              <option value="medium">Средна порода</option>
-              <option value="large">Голяма порода</option>
+              {DOG_SIZES.map((sz) => <option key={sz} value={sz}>{SIZE_LABEL[sz]} ({SIZE_HINT[sz].toLowerCase()})</option>)}
             </Select>
           </Field>
           <Field label="Ред" htmlFor="sort_order">
@@ -51,10 +49,8 @@ export default async function ServiceEdit({ params }: { params: Promise<{ id: st
         </div>
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Група" htmlFor="group_name">
-            <Select id="group_name" name="group_name" defaultValue={s?.group_name ?? "single"}>
-              <option value="package">Пакети</option>
-              <option value="single">Отделни услуги</option>
-              <option value="care">Хигиена и грижа</option>
+            <Select id="group_name" name="group_name" defaultValue={s?.group_name ?? "weight"}>
+              {SERVICE_GROUPS.map((g) => <option key={g} value={g}>{SERVICE_GROUP_LABEL[g]}</option>)}
             </Select>
           </Field>
           <Field label="Капаро, €" htmlFor="deposit" hint="Празно = 50% от „Цена от“, закръглено до 10 € при диапазон.">

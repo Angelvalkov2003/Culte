@@ -1,14 +1,21 @@
 "use client";
 
-/** Височина на залепения хедър + малко въздух. */
-const HEADER_OFFSET = 88;
+/** Височина на залепения хедър (72px на телефон, 108px на компютър) + малко въздух. */
+function headerOffset() {
+  return (document.querySelector("header")?.offsetHeight ?? 72) + 16;
+}
 
-/** Плавно скролва до елемента, ако горният му край не се вижда (над хедъра или под екрана). */
+/**
+ * Скролва до горния край на елемента, ако не се вижда (над хедъра или под екрана).
+ * force: винаги и мигновено — при смяна на стъпка, за да не остане потребителят долу,
+ * ако плавното скролване бъде прекъснато от новото съдържание.
+ */
 export function scrollToTop(el: HTMLElement | null, force = false) {
   if (!el) return;
+  const offset = headerOffset();
   const top = el.getBoundingClientRect().top;
-  if (!force && top >= HEADER_OFFSET - 4 && top < window.innerHeight * 0.35) return;
-  window.scrollTo({ top: window.scrollY + top - HEADER_OFFSET, behavior: "smooth" });
+  if (!force && top >= offset - 20 && top < window.innerHeight * 0.35) return;
+  window.scrollTo({ top: Math.max(0, window.scrollY + top - offset), behavior: force ? "instant" : "smooth" });
 }
 
 /**

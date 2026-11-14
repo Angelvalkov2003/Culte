@@ -57,7 +57,7 @@ export function MobileMenu({
   ] as (ContactLink | "" | false)[]).filter((x): x is ContactLink => Boolean(x));
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -95,7 +95,7 @@ export function MobileMenu({
         <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-terracotta" />
 
         <div className="flex items-center justify-between px-6 pt-5">
-          <Image src="/logo-nobg.png" alt="Culte" width={610} height={410} className="h-11 w-auto" />
+          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} className="h-11 w-auto" />
           <button
             type="button"
             onClick={() => setOpen(false)}

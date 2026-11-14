@@ -18,7 +18,7 @@ const isActive = (path: string, href: string) => (href === "/admin" ? path === "
 function Logo() {
   return (
     <Link href="/admin" aria-label="Табло" className="inline-block">
-      <Image src="/logo-nobg.png" alt="Culte" width={610} height={410} className="h-10 w-auto" />
+      <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} className="h-10 w-auto" />
     </Link>
   );
 }

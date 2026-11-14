@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getSettings } from "@/lib/settings";
+import { getSettings, listBG } from "@/lib/settings";
 import { ButtonLink } from "@/components/ui/button";
 import { PopOut } from "@/components/site/dog-figure";
 
@@ -23,7 +23,7 @@ export default async function AboutPage() {
             направим точно това, от което има нужда.
           </p>
           <p>
-            В салона ще срещнете {s.team.join(" и ")}. Работим с козметика {s.cosmetics.join(" и ")} и с продуктите, които
+            В салона ще срещнете {listBG(s.team)}. Работим с козметика {listBG(s.cosmetics)} и с продуктите, които
             виждате в магазина ни. Всеки от тях сме изпробвали първо в салона, преди да го предложим за домашна грижа.
           </p>
           <h2>Как работим</h2>

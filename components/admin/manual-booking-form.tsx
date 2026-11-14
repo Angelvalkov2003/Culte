@@ -6,7 +6,7 @@ import { ActionForm, SubmitButton } from "@/components/admin/action-form";
 import { Panel } from "@/components/admin/ui";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { formatRange } from "@/lib/format";
-import { SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
+import { DOG_SIZES, SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
 
 export function ManualBookingForm({ services, defaultDate, defaultTime }: { services: Service[]; defaultDate: string; defaultTime: string }) {
   const [size, setSize] = useState<DogSize>("small");
@@ -22,7 +22,7 @@ export function ManualBookingForm({ services, defaultDate, defaultTime }: { serv
         <div className="space-y-4">
           <Field label="Размер" htmlFor="size">
             <Select id="size" name="size" value={size} onChange={(e) => { setSize(e.target.value as DogSize); setMainId(""); setAddons([]); }}>
-              {(["small", "medium", "large"] as DogSize[]).map((s) => <option key={s} value={s}>{SIZE_LABEL[s]}</option>)}
+              {DOG_SIZES.map((s) => <option key={s} value={s}>{SIZE_LABEL[s]}</option>)}
             </Select>
           </Field>
           <Field label="Основна услуга" htmlFor="main_id">

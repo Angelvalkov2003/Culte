@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { cartCount } from "@/lib/shop/cart";
 import { getSettings } from "@/lib/settings";
-import { buttonClass } from "@/components/ui/button";
+import { DesktopNav, BookingCta } from "@/components/site/desktop-nav";
 import { MobileMenu } from "@/components/site/mobile-menu";
 import { CartLink } from "@/components/site/cart-link";
 
@@ -23,29 +23,17 @@ export async function Header() {
       >
         Към съдържанието
       </a>
-      <div className="container-page flex h-[72px] items-center justify-between gap-6 md:h-[92px]">
+      <div className="container-page flex h-[72px] items-center justify-between gap-6 lg:h-[108px]">
         <Link href="/" className="flex shrink-0 items-center" aria-label="Culte — начало">
-          <Image src="/logo-nobg.png" alt="Culte" width={610} height={410} priority className="h-12 w-auto md:h-[68px]" />
+          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} priority className="h-11 w-auto lg:h-[84px]" />
         </Link>
 
-        <nav aria-label="Основна навигация" className="hidden md:block">
-          <ul className="flex items-center gap-8 text-[15px]">
-            {NAV.map((item) => (
-              <li key={item.href}>
-                <Link href={item.href} className="text-espresso/85 transition-colors hover:text-terracotta">
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <DesktopNav items={NAV} />
 
         <div className="flex items-center gap-2 sm:gap-4">
           <CartLink count={count} />
-          <span className="hidden md:block">
-            <Link href="/booking" className={buttonClass("primary", "sm")}>
-              Запази час
-            </Link>
+          <span className="hidden lg:block">
+            <BookingCta />
           </span>
           <MobileMenu
             items={NAV}

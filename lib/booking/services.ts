@@ -15,7 +15,7 @@ export async function getActiveServices(): Promise<Service[]> {
     .order("sort_order");
   if (error) console.error("services", error.message);
   // Стойности по подразбиране, ако базата е със стара схема
-  return (data ?? []).map((s) => ({ group_name: "single", includes: "", breeds: "", addon_allowed: false, deposit: null, ...s }));
+  return (data ?? []).map((s) => ({ group_name: "weight", includes: "", breeds: "", addon_allowed: false, deposit: null, ...s }));
 }
 
 export interface Quote {

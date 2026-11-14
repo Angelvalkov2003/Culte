@@ -41,7 +41,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bg" className={`${cormorant.variable} ${manrope.variable}`}>
+    <html lang="bg" data-scroll-behavior="smooth" className={`${cormorant.variable} ${manrope.variable}`}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

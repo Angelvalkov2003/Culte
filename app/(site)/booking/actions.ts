@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { DOG_SIZES } from "@/lib/types";
 import { db } from "@/lib/supabase/admin";
 import { stripe, checkoutExpiry } from "@/lib/stripe";
 import { requestOrigin } from "@/lib/env";
@@ -12,7 +13,7 @@ import { sofiaToDate } from "@/lib/time";
 import { toCents } from "@/lib/format";
 
 const schema = z.object({
-  size: z.enum(["small", "medium", "large"]),
+  size: z.enum(DOG_SIZES),
   mainId: z.uuid(),
   addonIds: z.array(z.uuid()).max(12),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),

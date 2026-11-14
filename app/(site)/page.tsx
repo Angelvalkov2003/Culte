@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getBusinessHours, getSettings, groupHours } from "@/lib/settings";
+import { getBusinessHours, getSettings, groupHours, listBG } from "@/lib/settings";
 import { getCategories, getProducts } from "@/lib/shop/catalog";
 import { ButtonLink } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
@@ -96,25 +96,15 @@ export default async function HomePage() {
       </section>
 
       {/* Салонът */}
-      <section aria-labelledby="salon-title" className="container-page mt-28 grid gap-12 md:grid-cols-12">
-        <div data-reveal className="md:col-span-7">
-          <h2 id="salon-title" className="text-[clamp(2.2rem,4.5vw,3.6rem)] text-espresso">
-            Всяко куче получава цялото ни внимание. Буквално.
-          </h2>
-          <p className="prose-culte mt-6">
-            В салона работим с едно куче наведнъж. Няма чакане в клетка и шум от други животни — само спокойна
-            обстановка, топла вода и време да свикне с нас. Подстригваме според породата и според това как живее
-            кучето ви, а не по шаблон.
-          </p>
-        </div>
-        <dl data-reveal className="grid content-end gap-8 text-[15px] [--reveal-delay:120ms] md:col-span-4 md:col-start-9">
+      <section aria-label="Салонът" className="container-page mt-28">
+        <dl data-reveal className="grid gap-8 text-[15px] md:grid-cols-3">
           <div>
-            <dt className="text-sm text-espresso-soft">Грумъри</dt>
-            <dd className="mt-1 font-serif text-2xl">{s.team.join(" и ")}</dd>
+            <dt className="text-sm text-espresso-soft">{s.team.length > 1 ? "Грумъри" : "Грумър"}</dt>
+            <dd className="mt-1 font-serif text-2xl">{listBG(s.team)}</dd>
           </div>
           <div>
             <dt className="text-sm text-espresso-soft">Козметика в салона</dt>
-            <dd className="mt-1 font-serif text-2xl">{s.cosmetics.join(", ")}</dd>
+            <dd className="mt-1 font-serif text-2xl">{listBG(s.cosmetics)}</dd>
           </div>
           <div>
             <dt className="text-sm text-espresso-soft">Адрес</dt>
@@ -132,9 +122,9 @@ export default async function HomePage() {
       <section aria-labelledby="ritual-title" className="container-page mt-28">
         <div data-reveal className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-sm text-olive">Един час в Culte</p>
+            <p className="text-sm text-olive">Един час в Animal House</p>
             <h2 id="ritual-title" className="mt-3 max-w-[24ch] text-[clamp(2.2rem,4.5vw,3.4rem)]">
-              Без бързане. Без клетки. Само вашето куче.
+              Подари спа изживяване на своето кученце
             </h2>
           </div>
           <Link href="/grooming" className="link-underline text-[15px]">
@@ -144,10 +134,10 @@ export default async function HomePage() {
         <ol className="mt-14 grid grid-cols-2 gap-x-4 gap-y-12 lg:grid-cols-4 lg:gap-x-6">
           {(
             [
-              ["peach", "sand-deep", "Баня", "Шампоан и балсам според козината и кожата, с топла вода."],
-              ["puppy", "clay", "Подсушаване", "Внимателно и с почивки, ако кучето има нужда от тях."],
-              ["yorkieScissors", "sand-deep", "Подстригване", "По стандарта на породата или според начина ви на живот."],
-              ["shihtzu", "clay", "Финален щрих", "Разресване, последни корекции и съвет за грижа у дома."],
+              ["peach", "sand-deep", "Нокти, уши и очи", "Започваме с изрязване на ноктите и почистване на ушите и очите."],
+              ["puppy", "clay", "Баня", "Спа баня с подходящи продукти според типа козина."],
+              ["shihtzu", "sand-deep", "Подсушаване", "Подсушаване и внимателно разресване на козината."],
+              ["yorkieScissors", "clay", "Подстригване", "По стандарта на породата или по желание на клиента."],
             ] as const
           ).map(([dog, tone, title, text], i) => (
             <li key={title} data-reveal className={cn("group", i % 2 === 1 && "lg:mt-12")}>

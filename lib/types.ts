@@ -1,4 +1,5 @@
-export type DogSize = "small" | "medium" | "large";
+export const DOG_SIZES = ["small", "medium", "large"] as const;
+export type DogSize = (typeof DOG_SIZES)[number];
 export type BookingStatus = "pending_payment" | "confirmed" | "completed" | "cancelled" | "expired";
 export type OrderStatus =
   | "pending_payment"
@@ -31,17 +32,28 @@ export interface Service {
   sort_order: number;
 }
 
-export type ServiceGroup = "package" | "single" | "care";
+/** Ред на показване: породен груминг → цялостен (по килограми) → допълнителни. */
+export const SERVICE_GROUPS = ["breed", "weight", "extra"] as const;
+export type ServiceGroup = (typeof SERVICE_GROUPS)[number];
 export const SERVICE_GROUP_LABEL: Record<ServiceGroup, string> = {
-  package: "Пакети",
-  single: "Отделни услуги",
-  care: "Хигиена и грижа",
+  breed: "Породен груминг",
+  weight: "Цялостен груминг",
+  extra: "Допълнителни услуги",
 };
 export const SIZE_HINT: Record<DogSize, string> = {
   small: "До 5 кг",
-  medium: "От 5 до 10 кг",
-  large: "Над 10 кг",
+  medium: "До 15 кг",
+  large: "До 25 кг",
 };
+/** Такси и услуги, които не се записват онлайн — показват се в ценоразписа. */
+export const EXTRA_FEES: { name: string; price: string; note?: string }[] = [
+  { name: "Подстрижка на котка и рязане на нокти", price: "58 – 78 €", note: "записване по телефона" },
+  { name: "Такса сплъстяване", price: "28 €", note: "на час" },
+  { name: "Такса агресивно куче или котка", price: "25 €" },
+  { name: "Такса закъснение", price: "20 €", note: "над 15 минути" },
+  { name: "Такса кърлежи", price: "10 – 28 €" },
+  { name: "Такса бълхи", price: "25 €" },
+];
 export const PRICE_NOTE =
   "Крайната цена зависи от прическата, дължината и гъстотата на козината и колко време ще отнеме. Обадете ни се за по-точна цена.";
 
@@ -225,9 +237,9 @@ export interface OrderItem {
 }
 
 export const SIZE_LABEL: Record<DogSize, string> = {
-  small: "Малка порода",
-  medium: "Средна порода",
-  large: "Голяма порода",
+  small: "Малки кучета",
+  medium: "Средни кучета",
+  large: "Големи кучета",
 };
 
 export const BOOKING_STATUS_LABEL: Record<BookingStatus, string> = {

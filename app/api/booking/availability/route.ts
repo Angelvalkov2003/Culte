@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
+import { DOG_SIZES } from "@/lib/types";
 import { getAvailability } from "@/lib/booking/availability";
 import { resolveServices, quote } from "@/lib/booking/services";
 import { getSettings } from "@/lib/settings";
@@ -7,7 +8,7 @@ import { getSettings } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 
 const query = z.object({
-  size: z.enum(["small", "medium", "large"]),
+  size: z.enum(DOG_SIZES),
   main: z.uuid(),
   addons: z.string().optional(),
 });

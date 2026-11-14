@@ -2,7 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/supabase/admin";
 import { formatDuration, formatEUR, formatRange } from "@/lib/format";
 import { serviceDeposit } from "@/lib/booking/deposit";
-import { SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
+import { DOG_SIZES, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type Service } from "@/lib/types";
 import { ButtonLink } from "@/components/ui/button";
 import { PageHeader, Table, Td, Th } from "@/components/admin/ui";
 
@@ -17,7 +17,7 @@ export default async function ServicesPage() {
         Продължителността на резервацията е сумата от максималните времена; капарото е сумата от капарата на услугите.
       </PageHeader>
       <div className="space-y-10">
-        {(["small", "medium", "large"] as DogSize[]).map((size) => (
+        {DOG_SIZES.map((size) => (
           <section key={size}>
             <h2 className="mb-3 text-2xl">{SIZE_LABEL[size]} <span className="font-sans text-sm text-espresso-soft">{SIZE_HINT[size]}</span></h2>
             <Table>

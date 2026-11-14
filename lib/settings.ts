@@ -37,8 +37,8 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   facebook_url: "https://www.facebook.com/profile.php?id=61557470280771",
   tiktok_url: "https://www.tiktok.com/@animal.house.groom",
   map_url: "https://www.google.com/maps/search/?api=1&query=Груминг+салон+Animal+House+Пловдив",
-  team: ["Цветелина", "Стефани"],
-  cosmetics: ["Artero", "Hydra"],
+  team: ["Стефани"],
+  cosmetics: ["CULTE", "Artero", "Hydra"],
   deposit_percent: 50,
   slot_step_min: 30,
   min_lead_hours: 2,
@@ -116,4 +116,9 @@ export function groupHours(hours: BusinessHours[]): { label: string; value: stri
 
 function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** "А, Б и В" — изброяване на български. */
+export function listBG(items: string[]): string {
+  return new Intl.ListFormat("bg", { type: "conjunction" }).format(items);
 }

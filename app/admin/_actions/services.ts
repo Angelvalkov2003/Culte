@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { DOG_SIZES, SERVICE_GROUPS } from "@/lib/types";
 import { adminAction, f } from "@/lib/admin/action";
 import { db } from "@/lib/supabase/admin";
 import { getSettings } from "@/lib/settings";
@@ -10,7 +11,7 @@ import { suggestDeposit } from "@/lib/booking/deposit";
 const schema = z
   .object({
     id: z.string().optional().default(""),
-    size: z.enum(["small", "medium", "large"]),
+    size: z.enum(DOG_SIZES),
     name: f.req("Име", 120),
     description: f.text(500),
     duration_min: f.int("Мин. продължителност", 5, 600),
@@ -21,7 +22,7 @@ const schema = z
     is_addon: f.bool(),
     addon_allowed: f.bool(),
     is_active: f.bool(),
-    group_name: z.enum(["package", "single", "care"]),
+    group_name: z.enum(SERVICE_GROUPS),
     includes: f.text(1000),
     breeds: f.text(300),
     deposit: f.optMoney(),

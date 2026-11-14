@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { DOG_SIZES } from "@/lib/types";
 import { adminAction, f } from "@/lib/admin/action";
 import { db } from "@/lib/supabase/admin";
 import { cancelBooking, getBooking } from "@/lib/booking/lifecycle";
@@ -12,7 +13,7 @@ import { sofiaToDate } from "@/lib/time";
 const OVERLAP = "Този период се застъпва с друга активна резервация.";
 
 const manualSchema = z.object({
-  size: z.enum(["small", "medium", "large"]),
+  size: z.enum(DOG_SIZES),
   main_id: f.uuid(),
   addon_ids: z.array(z.uuid()).optional().default([]),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Изберете дата."),
