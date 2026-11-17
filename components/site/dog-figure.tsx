@@ -26,7 +26,7 @@ const TONES = {
 } as const;
 
 /** Сянка само встрани и отгоре — долният ръб на снимката е прав и стъпва на ръба на блока. */
-const SHADOW = "drop-shadow-[0_14px_18px_rgba(46,35,28,0.16)] [clip-path:inset(-40%_0_0_0)]";
+const SHADOW = "drop-shadow-[0_14px_18px_rgba(18,18,18,0.14)] [clip-path:inset(-40%_0_0_0)]";
 
 /** Изрязаното куче, само (без фон). Ширина се задава с className. */
 export function DogCutout({

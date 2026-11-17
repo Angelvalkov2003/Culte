@@ -69,17 +69,15 @@ export function MobileMenu({
         <Menu size={22} strokeWidth={1.5} />
       </button>
 
-      {/* Замъглен фон */}
       <div
         aria-hidden
         onClick={() => setOpen(false)}
         className={cn(
-          "fixed inset-0 z-[60] bg-espresso/30 backdrop-blur-md transition-opacity duration-300",
+          "fixed inset-0 z-[60] bg-espresso/35 backdrop-blur-md transition-opacity duration-300",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
       />
 
-      {/* Чекмедже */}
       <div
         id="mobile-nav"
         role="dialog"
@@ -87,20 +85,19 @@ export function MobileMenu({
         aria-label="Меню"
         inert={!open}
         className={cn(
-          "pattern pattern-bones pattern-light fixed inset-y-0 right-0 z-[60] flex w-2/3 min-w-[240px] max-w-sm flex-col overflow-y-auto bg-espresso text-cream shadow-[-24px_0_60px_rgba(46,35,28,0.35)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          "fixed inset-y-0 right-0 z-[60] flex w-2/3 min-w-[240px] max-w-sm flex-col overflow-y-auto bg-cream text-espresso shadow-[-24px_0_60px_rgba(18,18,18,0.18)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
           open ? "translate-x-0" : "translate-x-full",
         )}
       >
-        {/* Тънка терракотена линия по левия ръб */}
-        <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-terracotta" />
+        <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-sand-deep" />
 
         <div className="flex items-center justify-between px-6 pt-5">
-          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} className="h-11 w-auto" />
+          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} className="h-10 w-auto" />
           <button
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Затвори менюто"
-            className="inline-flex size-10 items-center justify-center rounded-full border border-cream/20 text-cream transition-colors hover:border-cream/60 hover:bg-cream/10"
+            className="inline-flex size-10 items-center justify-center rounded-full border border-line text-espresso transition-colors hover:bg-sand"
           >
             <X size={20} strokeWidth={1.5} />
           </button>
@@ -116,20 +113,17 @@ export function MobileMenu({
                   className={cn("transition-[opacity,translate] duration-500 ease-out", open ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0")}
                   style={{ transitionDelay: open ? `${120 + i * 60}ms` : "0ms" }}
                 >
-                  <Link
-                    href={item.href}
-                    aria-current={active ? "page" : undefined}
-                    className="group flex items-baseline gap-3 py-2.5"
-                  >
-                    <span className="w-6 font-sans text-xs text-clay tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                  <Link href={item.href} aria-current={active ? "page" : undefined} className="group flex items-baseline gap-3 py-2.5">
+                    <span className="w-6 font-sans text-xs text-espresso-soft tabular-nums">{String(i + 1).padStart(2, "0")}</span>
                     <span
                       className={cn(
                         "font-serif text-[2.1rem] leading-none transition-colors",
-                        active ? "text-clay" : "text-cream group-hover:text-clay",
+                        active ? "text-espresso" : "text-espresso/80 group-hover:text-espresso",
                       )}
                     >
                       {item.label}
                     </span>
+                    {active && <span aria-hidden className="ml-auto size-2 rounded-full bg-gold" />}
                   </Link>
                 </li>
               );
@@ -153,7 +147,7 @@ export function MobileMenu({
                     aria-label={x.label}
                     title={x.label}
                     {...(x.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    className="inline-flex size-10 items-center justify-center rounded-full border border-cream/20 text-cream/90 transition-colors hover:border-clay hover:bg-clay hover:text-espresso"
+                    className="inline-flex size-10 items-center justify-center rounded-full border border-line text-espresso transition-colors hover:border-gold hover:bg-sand"
                   >
                     {x.icon}
                   </a>
@@ -162,7 +156,7 @@ export function MobileMenu({
             </ul>
           )}
           {contacts.phone && (
-            <a href={`tel:${contacts.phone.replace(/\s+/g, "")}`} className="mt-5 block font-serif text-2xl lining-nums text-cream/90">
+            <a href={`tel:${contacts.phone.replace(/\s+/g, "")}`} className="mt-5 block font-serif text-2xl lining-nums text-espresso">
               {contacts.phone}
             </a>
           )}

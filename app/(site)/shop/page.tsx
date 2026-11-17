@@ -85,7 +85,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                 <li>
                   <Link
                     href={href({ category: undefined })}
-                    className={cn("block py-1", !sp.category ? "font-semibold text-terracotta" : "hover:text-terracotta")}
+                    className={cn("block py-1", !sp.category ? "font-semibold text-espresso" : "text-espresso-soft hover:text-espresso")}
                     aria-current={!sp.category ? "page" : undefined}
                   >
                     Всички
@@ -95,7 +95,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                   <li key={c.id}>
                     <Link
                       href={href({ category: c.slug })}
-                      className={cn("block py-1", sp.category === c.slug ? "font-semibold text-terracotta" : "hover:text-terracotta")}
+                      className={cn("block py-1", sp.category === c.slug ? "font-semibold text-espresso" : "text-espresso-soft hover:text-espresso")}
                       aria-current={sp.category === c.slug ? "page" : undefined}
                     >
                       {c.name}

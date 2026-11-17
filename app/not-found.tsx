@@ -14,7 +14,7 @@ export default function NotFound() {
           <Link href="/booking" className="link-underline">Запази час</Link>
         </div>
       </div>
-      <PopOut dog="poodleViolet" tone="clay" className="mx-auto w-full max-w-[300px] md:col-span-4 md:col-start-9" sizes="300px" />
+      <PopOut dog="poodleViolet" tone="sand-deep" className="mx-auto w-full max-w-[300px] md:col-span-4 md:col-start-9" sizes="300px" />
     </main>
   );
 }

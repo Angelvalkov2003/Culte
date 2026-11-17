@@ -87,11 +87,11 @@ export function BookingCalendar({
               className={cn(
                 "aspect-square rounded-md text-[15px] tabular-nums transition-colors",
                 isSel
-                  ? "bg-terracotta text-cream"
+                  ? "bg-espresso text-cream"
                   : free
                     ? "bg-sand text-espresso hover:bg-sand-deep"
                     : "text-espresso/25",
-                d === today && !isSel && "ring-1 ring-clay",
+                d === today && !isSel && "ring-1 ring-espresso/30",
               )}
             >
               {i + 1}

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Onest } from "next/font/google";
 import { siteUrl } from "@/lib/env";
 import "./globals.css";
 
@@ -11,9 +11,9 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
-const manrope = Manrope({
+const onest = Onest({
   subsets: ["latin", "cyrillic"],
-  variable: "--font-manrope",
+  variable: "--font-onest",
   display: "swap",
 });
 
@@ -36,12 +36,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FAF6EF",
+  themeColor: "#F3EEE6",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="bg" data-scroll-behavior="smooth" className={`${cormorant.variable} ${manrope.variable}`}>
+    <html lang="bg" data-scroll-behavior="smooth" className={`${cormorant.variable} ${onest.variable}`}>
       <body className="min-h-dvh">{children}</body>
     </html>
   );

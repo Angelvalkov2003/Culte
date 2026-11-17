@@ -35,8 +35,8 @@ export default async function AboutPage() {
           </ul>
         </div>
         <aside className="group animate-rise self-start [animation-delay:150ms] md:col-span-4 md:col-start-9 md:row-span-2 md:row-start-1">
-          <PopOut dog="puppy" tone="sand" priority className="mx-auto max-w-[320px] md:max-w-none" blockClassName="rounded-b-none" sizes="(min-width: 768px) 380px, 320px" />
-          <div className="mx-auto max-w-[320px] rounded-b-lg bg-sand p-6 pt-2 md:max-w-none">
+          <PopOut dog="puppy" tone="sand-deep" priority className="mx-auto max-w-[320px] md:max-w-none" blockClassName="rounded-b-none" sizes="(min-width: 768px) 380px, 320px" />
+          <div className="mx-auto max-w-[320px] rounded-b-lg bg-sand-deep p-6 pt-2 md:max-w-none">
           <p className="font-serif text-2xl">Елате да се запознаем</p>
           <p className="mt-2 text-[15px] text-espresso-soft">{s.address}</p>
           <ButtonLink href="/booking" className="mt-6">Запази час</ButtonLink>

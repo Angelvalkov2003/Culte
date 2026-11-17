@@ -16,21 +16,21 @@ export const NAV = [
 export async function Header() {
   const [count, s] = await Promise.all([cartCount(), getSettings()]);
   return (
-    <header className="sticky top-0 z-[55] border-b border-line/70 bg-cream">
+    <header className="sticky top-0 z-[55] border-b border-line bg-cream/95 backdrop-blur-md">
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:rounded-md focus:bg-espresso focus:px-3 focus:py-2 focus:text-cream"
       >
         Към съдържанието
       </a>
-      <div className="container-page flex h-[72px] items-center justify-between gap-6 lg:h-[108px]">
+      <div className="container-page flex h-[72px] items-center justify-between gap-6 lg:h-[96px]">
         <Link href="/" className="flex shrink-0 items-center" aria-label="Culte — начало">
-          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} priority className="h-11 w-auto lg:h-[84px]" />
+          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} priority className="h-10 w-auto lg:h-[72px]" />
         </Link>
 
         <DesktopNav items={NAV} />
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
           <CartLink count={count} />
           <span className="hidden lg:block">
             <BookingCta />

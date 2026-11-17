@@ -20,7 +20,7 @@ export function AddToCart({ productId, stock }: { productId: string; stock: numb
 
   return (
     <div>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <div className="flex h-13 items-center rounded-md border border-line" role="group" aria-label="Количество">
           <button type="button" className="h-full w-11 text-lg disabled:opacity-30" onClick={() => setQty((q) => Math.max(1, q - 1))}
             disabled={qty <= 1} aria-label="Намали">
@@ -35,7 +35,7 @@ export function AddToCart({ productId, stock }: { productId: string; stock: numb
         <Button
           type="button"
           size="lg"
-          className="flex-1"
+          className="min-w-48 flex-1"
           disabled={pending}
           onClick={() =>
             start(async () => {

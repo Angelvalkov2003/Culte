@@ -35,7 +35,7 @@ export default async function GroomingPage() {
         <div className="md:col-span-7">
           <h1 className="animate-rise text-[clamp(2.4rem,4.6vw,4rem)] leading-[1.05] text-balance">
             Красотата е в детайла.
-            <span className="mt-1 block font-normal text-terracotta italic">Грижата – в отношението.</span>
+            <span className="mt-1 block font-normal text-espresso-soft">Грижата – в отношението.</span>
           </h1>
 
           <p className="mt-8 max-w-[52ch] text-[17px] leading-8 text-espresso">
@@ -43,7 +43,7 @@ export default async function GroomingPage() {
             разбиране и индивидуален подход.
           </p>
 
-          <div className="mt-8 grid max-w-[60ch] gap-5 border-l border-clay/60 pl-5 text-[15px] leading-7 text-espresso-soft sm:pl-6">
+          <div className="mt-8 grid max-w-[60ch] gap-5 border-l-2 border-sand-deep pl-5 text-[15px] leading-7 text-espresso-soft sm:pl-6">
             <p>
               Аз съм <span className="font-serif text-[1.35em] leading-none text-espresso italic">Стефани</span> и ще се
               погрижа за Вашия любимец с професионализъм, прецизност и висок клас козметика от{" "}

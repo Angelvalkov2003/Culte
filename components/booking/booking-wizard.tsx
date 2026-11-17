@@ -188,7 +188,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                 onClick={() => setStep(i)}
                 className={cn(
                   "tabular-nums transition-colors disabled:cursor-default",
-                  i === step ? "font-semibold text-espresso" : i < step ? "text-terracotta hover:underline" : "text-espresso/40",
+                  i === step ? "font-semibold text-espresso" : i < step ? "text-espresso-soft hover:underline" : "text-espresso/40",
                 )}
               >
                 {i + 1}. {label}
@@ -210,7 +210,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                     aria-pressed={size === s}
                     className={cn(
                       "flex min-h-40 flex-col justify-between rounded-lg border p-5 text-left transition-colors",
-                      size === s ? "border-terracotta bg-sand" : "border-line bg-white/50 hover:border-clay",
+                      size === s ? "border-espresso bg-sand" : "border-line bg-cream hover:border-espresso/30",
                     )}
                   >
                     <span>
@@ -363,8 +363,8 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                             className={cn(
                               "h-11 rounded-md border text-[15px] tabular-nums transition-colors",
                               time === t
-                                ? "border-terracotta bg-terracotta text-cream"
-                                : "border-line bg-white/60 hover:border-terracotta",
+                                ? "border-espresso bg-espresso text-cream"
+                                : "border-line bg-cream hover:border-espresso/40 hover:bg-sand",
                             )}
                           >
                             {t}

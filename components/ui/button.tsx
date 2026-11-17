@@ -8,8 +8,8 @@ type Size = "sm" | "md" | "lg";
 const base =
   "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap";
 const variants: Record<Variant, string> = {
-  primary: "bg-terracotta text-cream hover:bg-terracotta-dark",
-  secondary: "border border-espresso/25 text-espresso hover:border-espresso hover:bg-sand",
+  primary: "bg-espresso text-cream hover:bg-espresso/90",
+  secondary: "border border-espresso/20 text-espresso hover:border-espresso hover:bg-sand",
   ghost: "text-espresso hover:bg-sand",
   light: "bg-cream text-espresso hover:bg-sand",
   danger: "border border-danger/40 text-danger hover:bg-danger hover:text-cream",

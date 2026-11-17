@@ -27,7 +27,7 @@ export default async function ContactPage() {
   return (
     <div className="container-page pt-12">
       <h1 className="animate-rise text-[clamp(2.6rem,6vw,4.4rem)]">Контакти</h1>
-      <div className="mt-10 grid gap-10 md:grid-cols-12">
+      <div className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-10 md:grid-cols-12">
         <div className="space-y-8 text-[15px] md:col-span-4">
           <div>
             <h2 className="font-sans text-sm font-semibold">Адрес</h2>

@@ -13,7 +13,7 @@ export function ProductPlaceholder({
   large?: boolean;
 }) {
   // Лек вариант на тона по името, за да не изглеждат всички еднакво
-  const tones = ["bg-sand", "bg-sand-deep/70", "bg-[#EFE4D3]", "bg-[#EDE6D6]"];
+  const tones = ["bg-sand", "bg-sand-deep/80", "bg-[#ebe3d6]", "bg-[#f7f4ef]"];
   const tone = tones[[...name].reduce((a, c) => a + c.charCodeAt(0), 0) % tones.length];
   return (
     <div

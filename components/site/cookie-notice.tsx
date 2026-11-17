@@ -26,7 +26,7 @@ export function CookieNotice() {
     <div
       role="region"
       aria-label="Бисквитки"
-      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-xl rounded-lg border border-line bg-cream p-4 text-sm text-espresso-soft shadow-[0_8px_30px_rgba(46,35,28,0.12)] sm:inset-x-auto sm:right-6 sm:bottom-6"
+      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-xl rounded-lg border border-line bg-cream p-4 text-sm text-espresso-soft shadow-[0_8px_30px_rgba(18,18,18,0.1)] sm:inset-x-auto sm:right-6 sm:bottom-6"
     >
       <p>
         Използваме само необходими бисквитки, за да работят количката и плащането. Подробности в{" "}

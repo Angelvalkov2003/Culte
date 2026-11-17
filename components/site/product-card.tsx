@@ -20,8 +20,8 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           </span>
         )}
       </div>
-      <div className="mt-3 flex items-start justify-between gap-4">
-        <h3 className="font-sans text-[15px] leading-snug font-medium text-espresso transition-colors group-hover:text-terracotta">
+      <div className="mt-3 flex items-start justify-between gap-2 sm:gap-4">
+        <h3 className="min-w-0 font-sans text-[15px] leading-snug font-medium text-espresso transition-colors group-hover:text-terracotta">
           {product.name}
         </h3>
         <p className="shrink-0 text-[15px] tabular-nums text-espresso">{formatEUR(product.price)}</p>

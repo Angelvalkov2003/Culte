@@ -23,89 +23,54 @@ export default async function HomePage() {
     <>
       <JsonLd data={localBusinessJsonLd(s, hours)} />
 
-      {/* Hero: две равностойни посоки */}
-      <section aria-labelledby="hero-title" className="container-page pt-8 sm:pt-12">
-        <h1 id="hero-title" className="sr-only">
-          Culte — груминг салон и козметика за кучета
-        </h1>
-        <div className="grid gap-3 md:grid-cols-2 md:gap-4">
-          <article className="relative flex min-h-[440px] flex-col justify-between gap-8 overflow-hidden rounded-lg bg-sand p-7 pattern pattern-bones sm:min-h-[560px] sm:p-10">
-            <div className="relative z-10">
-              <p className="text-sm text-olive">Груминг салон</p>
-              <h2 className="mt-4 max-w-[12ch] text-[clamp(2.6rem,6vw,4.6rem)] text-espresso">
-                Запази час за груминг
-              </h2>
-            </div>
-            <div className="relative z-10 space-y-6 lg:max-w-[15.5rem] xl:max-w-[17rem]">
-              <dl className="grid max-w-sm grid-cols-2 gap-y-1 text-sm text-espresso-soft">
-                {hoursText.map((h) => (
-                  <div key={h.label} className="contents">
-                    <dt>{h.label}</dt>
-                    <dd className="tabular-nums text-espresso">{h.value}</dd>
-                  </div>
-                ))}
-              </dl>
-              <ButtonLink href="/booking" size="lg">
+      {/* Hero: едно платно — марка + една посока + доминантно изображение */}
+      <section aria-labelledby="hero-title" className="relative overflow-hidden bg-sand pattern pattern-bones">
+        <div className="container-page relative grid items-center gap-8 pt-12 pb-0 md:min-h-[min(78vh,700px)] md:grid-cols-12 md:gap-6 md:pt-8">
+          <div className="relative z-10 md:col-span-6 md:pb-14 lg:col-span-5">
+            <p className="font-serif text-[clamp(3.2rem,8vw,5.8rem)] leading-[0.9] tracking-[-0.03em] text-espresso">
+              Culte
+            </p>
+            <h1 id="hero-title" className="mt-5 max-w-[16ch] font-sans text-[clamp(1.25rem,2.4vw,1.7rem)] font-medium leading-snug tracking-normal text-espresso">
+              Груминг салон и козметика за кучета в Пловдив
+            </h1>
+            <p className="mt-4 max-w-[36ch] text-[15px] leading-7 text-espresso/80">
+              Спокойна грижа с едно куче наведнъж и продуктите, които ползваме в салона.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <ButtonLink href="/booking" size="lg" className="text-white hover:text-white">
                 Запази час
               </ButtonLink>
-            </div>
-            <DogCutout
-              dog="poodleGold"
-              priority
-              sizes="(min-width: 1280px) 290px, (min-width: 1024px) 230px, 220px"
-              className="-mb-7 mt-8 ml-auto w-[min(62%,220px)] animate-rise sm:-mb-10 lg:absolute lg:right-6 lg:bottom-0 lg:mb-0 lg:w-[42%] lg:max-w-[290px] xl:right-10"
-            />
-          </article>
-
-          <article className="relative flex min-h-[440px] flex-col justify-between gap-8 overflow-hidden rounded-lg bg-espresso p-7 text-cream pattern pattern-grid pattern-light sm:min-h-[560px] sm:p-10">
-            <div className="relative z-10">
-              <p className="text-sm text-clay">Онлайн магазин</p>
-              <h2 className="mt-4 max-w-[13ch] text-[clamp(2.4rem,5vw,4.2rem)] leading-[1.05] text-cream">
-                Пазарувай козметика и парфюми
-              </h2>
-            </div>
-            <div className="relative z-10 space-y-6 lg:max-w-[15.5rem] xl:max-w-[17rem]">
-              <p className="max-w-sm text-[15px] leading-7 text-cream/75">
-                Шампоани, балсами и аромати, които ползваме и препоръчваме. Доставка в цялата страна.
-              </p>
-              {categories.length > 0 && (
-                <ul className="flex max-w-md flex-wrap gap-x-5 gap-y-1.5 text-sm">
-                  {categories.slice(0, 6).map((c) => (
-                    <li key={c.id}>
-                      <Link href={`/shop?category=${c.slug}`} className="text-cream/80 hover:text-cream">
-                        {c.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <ButtonLink href="/shop" size="lg" variant="light">
+              <ButtonLink href="/shop" size="lg" variant="secondary" className="border-espresso/25 bg-transparent">
                 Към магазина
               </ButtonLink>
             </div>
+          </div>
+
+          <div className="relative z-10 flex items-end justify-center self-end md:col-span-6 md:justify-end lg:col-span-7">
             <DogCutout
-              dog="poodleViolet"
-              sizes="(min-width: 1280px) 290px, (min-width: 1024px) 230px, 220px"
-              className="-mb-7 mt-8 ml-auto w-[min(62%,220px)] animate-rise [animation-delay:120ms] sm:-mb-10 lg:absolute lg:right-6 lg:bottom-0 lg:mb-0 lg:w-[42%] lg:max-w-[290px] xl:right-10 drop-shadow-[0_0_28px_rgba(244,235,222,0.22)]"
+              dog="poodleGold"
+              priority
+              sizes="(min-width: 1024px) 420px, (min-width: 768px) 340px, 280px"
+              className="w-[min(78%,300px)] animate-rise md:w-[min(100%,400px)]"
             />
-          </article>
+          </div>
         </div>
       </section>
 
-      {/* Салонът */}
-      <section aria-label="Салонът" className="container-page mt-28">
-        <dl data-reveal className="grid gap-8 text-[15px] md:grid-cols-3">
+      {/* Салонът — кратки факти върху бяло */}
+      <section aria-label="Салонът" className="container-page mt-20 md:mt-28">
+        <dl data-reveal className="grid gap-10 border-y border-line py-10 text-[15px] md:grid-cols-3 md:gap-8">
           <div>
             <dt className="text-sm text-espresso-soft">{s.team.length > 1 ? "Грумъри" : "Грумър"}</dt>
-            <dd className="mt-1 font-serif text-2xl">{listBG(s.team)}</dd>
+            <dd className="mt-2 font-serif text-2xl text-espresso">{listBG(s.team)}</dd>
           </div>
           <div>
             <dt className="text-sm text-espresso-soft">Козметика в салона</dt>
-            <dd className="mt-1 font-serif text-2xl">{listBG(s.cosmetics)}</dd>
+            <dd className="mt-2 font-serif text-2xl text-espresso">{listBG(s.cosmetics)}</dd>
           </div>
           <div>
             <dt className="text-sm text-espresso-soft">Адрес</dt>
-            <dd className="mt-1">
+            <dd className="mt-2 text-espresso">
               {s.address}.{" "}
               <a href={s.map_url} target="_blank" rel="noopener noreferrer" className="link-underline">
                 Карта
@@ -115,11 +80,11 @@ export default async function HomePage() {
         </dl>
       </section>
 
-      {/* Един час в салона — визуален ритъм от изрязани снимки */}
-      <section aria-labelledby="ritual-title" className="container-page mt-28">
+      {/* Един час в салона */}
+      <section aria-labelledby="ritual-title" className="container-page mt-24 md:mt-28">
         <div data-reveal className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-sm text-olive">Един час в Animal House</p>
+            <p className="text-sm text-espresso-soft">Един час в Animal House</p>
             <h2 id="ritual-title" className="mt-3 max-w-[24ch] text-[clamp(2.2rem,4.5vw,3.4rem)]">
               Подари спа изживяване на своето кученце
             </h2>
@@ -132,15 +97,15 @@ export default async function HomePage() {
           {(
             [
               ["peach", "sand-deep", "Нокти, уши и очи", "Започваме с изрязване на ноктите и почистване на ушите и очите."],
-              ["puppy", "clay", "Баня", "Спа баня с подходящи продукти според типа козина."],
+              ["puppy", "sand", "Баня", "Спа баня с подходящи продукти според типа козина."],
               ["shihtzu", "sand-deep", "Подсушаване", "Подсушаване и внимателно разресване на козината."],
-              ["yorkieScissors", "clay", "Подстригване", "По стандарта на породата или по желание на клиента."],
+              ["yorkieScissors", "sand", "Подстригване", "По стандарта на породата или по желание на клиента."],
             ] as const
           ).map(([dog, tone, title, text], i) => (
             <li key={title} data-reveal className={cn("group", i % 2 === 1 && "lg:mt-12")}>
               <PopOut dog={dog} tone={tone} sizes="(min-width: 1024px) 280px, 45vw" />
-              <div className="mt-5 flex items-baseline gap-3 border-t border-espresso/15 pt-4">
-                <span className="font-serif text-xl text-clay tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+              <div className="mt-5 flex items-baseline gap-3 border-t border-line pt-4">
+                <span className="font-serif text-xl text-gold tabular-nums">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="font-sans text-base font-semibold">{title}</h3>
               </div>
               <p className="mt-1.5 text-[15px] leading-6 text-espresso-soft">{text}</p>
@@ -149,13 +114,59 @@ export default async function HomePage() {
         </ol>
       </section>
 
-      {/* Записване — онлайн или по телефона */}
-      <section aria-labelledby="steps-title" className="mt-28 bg-sand py-20 pattern pattern-scatter md:py-24">
+      {/* Две посоки — груминг / магазин */}
+      <section aria-label="Посоки" className="container-page mt-24 md:mt-28">
+        <div className="grid gap-4 md:grid-cols-2">
+          <article data-reveal className="relative flex min-h-[380px] flex-col justify-between overflow-hidden rounded-lg bg-sand p-8 sm:min-h-[420px] sm:p-10">
+            <div>
+              <p className="text-sm text-espresso-soft">Груминг салон</p>
+              <h2 className="mt-3 max-w-[12ch] text-[clamp(2rem,4vw,3rem)]">Запази час за груминг</h2>
+              <dl className="mt-8 grid max-w-sm grid-cols-2 gap-y-1 text-sm text-espresso-soft">
+                {hoursText.map((h) => (
+                  <div key={h.label} className="contents">
+                    <dt>{h.label}</dt>
+                    <dd className="tabular-nums text-espresso">{h.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+            <ButtonLink href="/booking" size="lg" className="mt-10 w-fit">
+              Запази час
+            </ButtonLink>
+          </article>
+
+          <article data-reveal className="relative flex min-h-[380px] flex-col justify-between overflow-hidden rounded-lg bg-espresso p-8 text-cream sm:min-h-[420px] sm:p-10">
+            <div>
+              <p className="text-sm text-cream/60">Онлайн магазин</p>
+              <h2 className="mt-3 max-w-[13ch] text-[clamp(2rem,4vw,3rem)] text-cream">Козметика и парфюми</h2>
+              <p className="mt-6 max-w-sm text-[15px] leading-7 text-cream/70">
+                Шампоани, балсами и аромати, които ползваме и препоръчваме. Доставка в цялата страна.
+              </p>
+              {categories.length > 0 && (
+                <ul className="mt-5 flex max-w-md flex-wrap gap-x-5 gap-y-1.5 text-sm">
+                  {categories.slice(0, 6).map((c) => (
+                    <li key={c.id}>
+                      <Link href={`/shop?category=${c.slug}`} className="text-cream/75 transition-colors hover:text-sand-deep">
+                        {c.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <ButtonLink href="/shop" size="lg" variant="light" className="mt-10 w-fit">
+              Към магазина
+            </ButtonLink>
+          </article>
+        </div>
+      </section>
+
+      {/* Записване */}
+      <section aria-labelledby="steps-title" className="mt-24 bg-sand py-20 md:mt-28 md:py-24">
         <div className="container-page grid items-end gap-12 md:grid-cols-12">
           <div data-reveal className="md:col-span-7">
             <h2 id="steps-title" className="text-[clamp(2.4rem,5vw,3.8rem)] leading-[1.05]">
-              Запиши час
-              <span className="block font-normal text-terracotta italic">лесно и удобно.</span>
+              Запиши час лесно и удобно
             </h2>
             <p className="mt-6 max-w-[46ch] text-[15px] leading-7 text-espresso-soft">
               Ако нещо се промени, ще сме ви благодарни да ни предупредите поне 48 часа по-рано.
@@ -184,10 +195,10 @@ export default async function HomePage() {
 
       {/* Продукти */}
       {featured.length > 0 && (
-        <section aria-labelledby="shop-title" className="container-page mt-28">
+        <section aria-labelledby="shop-title" className="container-page mt-24 md:mt-28">
           <div data-reveal className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-sm text-olive">Разгледайте нашите професионални продукти</p>
+              <p className="text-sm text-espresso-soft">Разгледайте нашите професионални продукти</p>
               <h2 id="shop-title" className="mt-3 max-w-lg text-4xl">
                 От рафта в салона до вашата баня
               </h2>

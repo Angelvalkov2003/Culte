@@ -7,7 +7,7 @@ export function CheckboxBox({ className, ...props }: Omit<ComponentProps<"input"
     <span className={cn("relative inline-flex size-5 shrink-0", className)}>
       <input
         type="checkbox"
-        className="peer absolute inset-0 m-0 cursor-pointer appearance-none rounded-sm border border-clay bg-white/80 transition-colors checked:border-terracotta checked:bg-terracotta hover:border-terracotta focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-terracotta aria-[invalid=true]:border-danger disabled:cursor-not-allowed disabled:opacity-50"
+        className="peer absolute inset-0 m-0 cursor-pointer appearance-none rounded-sm border border-espresso/30 bg-cream transition-colors checked:border-espresso checked:bg-espresso hover:border-espresso focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-espresso aria-[invalid=true]:border-danger disabled:cursor-not-allowed disabled:opacity-50"
         {...props}
       />
       <svg

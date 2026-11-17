@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/format";
 
 export const inputClass =
-  "block w-full rounded-md border border-line bg-white/70 px-3.5 py-2.5 text-[15px] text-espresso placeholder:text-espresso/40 transition-colors focus:border-terracotta focus:bg-white focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-terracotta/20 aria-[invalid=true]:border-danger";
+  "block w-full rounded-md border border-line bg-cream px-3.5 py-2.5 text-[15px] text-espresso placeholder:text-espresso/40 transition-colors focus:border-espresso focus:bg-cream focus:outline-none focus-visible:outline-none focus:ring-2 focus:ring-sand-deep/80 aria-[invalid=true]:border-danger";
 
 export function Field({
   label,
