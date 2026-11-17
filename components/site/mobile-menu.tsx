@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Mail, Menu, Phone, X } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
 import { FacebookIcon, InstagramIcon, TikTokIcon } from "@/components/site/social-icons";
@@ -17,7 +18,7 @@ export type MobileMenuContacts = {
   tiktok: string;
 };
 
-/** Мобилно меню: чекмедже отдясно (2/3 от екрана), замъглен фон зад него. */
+/** Мобилно меню: чекмедже отдясно; overlay/panel през portal, за да не ги чупи sticky+backdrop-blur на header-а. */
 const NO_CONTACTS: MobileMenuContacts = { phone: "", email: "", instagram: "", facebook: "", tiktok: "" };
 
 export function MobileMenu({
@@ -28,6 +29,7 @@ export function MobileMenu({
   contacts?: MobileMenuContacts;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const [lastPath, setLastPath] = useState(pathname);
 
@@ -35,6 +37,10 @@ export function MobileMenu({
     setLastPath(pathname);
     setOpen(false);
   }
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -56,6 +62,107 @@ export function MobileMenu({
     contacts.tiktok && { href: contacts.tiktok, label: "TikTok", icon: <TikTokIcon className="size-[18px]" />, external: true },
   ] as (ContactLink | "" | false)[]).filter((x): x is ContactLink => Boolean(x));
 
+  const panel =
+    mounted &&
+    createPortal(
+      <>
+        <div
+          aria-hidden
+          onClick={() => setOpen(false)}
+          className={cn(
+            "fixed inset-0 z-[60] bg-espresso/35 backdrop-blur-md transition-opacity duration-300 lg:hidden",
+            open ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
+        />
+
+        <div
+          id="mobile-nav"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Меню"
+          inert={!open}
+          className={cn(
+            "fixed inset-y-0 right-0 z-[60] flex w-2/3 min-w-[240px] max-w-sm flex-col overflow-y-auto bg-cream text-espresso shadow-[-24px_0_60px_rgba(18,18,18,0.18)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
+            open ? "translate-x-0" : "translate-x-full",
+          )}
+        >
+          <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-sand-deep" />
+
+          <div className="flex items-center justify-between px-6 pt-5">
+            <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} className="h-10 w-auto" />
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Затвори менюто"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-line text-espresso transition-colors hover:bg-sand"
+            >
+              <X size={20} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          <nav aria-label="Мобилна навигация" className="mt-10 px-6">
+            <ul className="space-y-1">
+              {items.map((item, i) => {
+                const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <li
+                    key={item.href}
+                    className={cn("transition-[opacity,translate] duration-500 ease-out", open ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0")}
+                    style={{ transitionDelay: open ? `${120 + i * 60}ms` : "0ms" }}
+                  >
+                    <Link href={item.href} aria-current={active ? "page" : undefined} className="group flex items-baseline gap-3 py-2.5">
+                      <span className="w-6 font-sans text-xs text-espresso-soft tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                      <span
+                        className={cn(
+                          "font-serif text-[2.1rem] leading-none transition-colors",
+                          active ? "text-espresso" : "text-espresso/80 group-hover:text-espresso",
+                        )}
+                      >
+                        {item.label}
+                      </span>
+                      {active && <span aria-hidden className="ml-auto size-2 rounded-full bg-gold" />}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div
+            className={cn("mt-auto px-6 pt-10 pb-8 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")}
+            style={{ transitionDelay: open ? `${160 + items.length * 60}ms` : "0ms" }}
+          >
+            <Link href="/booking" className={buttonClass("primary", "lg", "w-full")}>
+              Запази час
+            </Link>
+            {icons.length > 0 && (
+              <ul className="mt-6 flex flex-wrap gap-2" aria-label="Връзка с нас">
+                {icons.map((x) => (
+                  <li key={x.label}>
+                    <a
+                      href={x.href}
+                      aria-label={x.label}
+                      title={x.label}
+                      {...(x.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="inline-flex size-10 items-center justify-center rounded-full border border-line text-espresso transition-colors hover:border-gold hover:bg-sand"
+                    >
+                      {x.icon}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {contacts.phone && (
+              <a href={`tel:${contacts.phone.replace(/\s+/g, "")}`} className="mt-5 block font-serif text-2xl lining-nums text-espresso">
+                {contacts.phone}
+              </a>
+            )}
+          </div>
+        </div>
+      </>,
+      document.body,
+    );
+
   return (
     <div className="lg:hidden">
       <button
@@ -68,100 +175,7 @@ export function MobileMenu({
       >
         <Menu size={22} strokeWidth={1.5} />
       </button>
-
-      <div
-        aria-hidden
-        onClick={() => setOpen(false)}
-        className={cn(
-          "fixed inset-0 z-[60] bg-espresso/35 backdrop-blur-md transition-opacity duration-300",
-          open ? "opacity-100" : "pointer-events-none opacity-0",
-        )}
-      />
-
-      <div
-        id="mobile-nav"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Меню"
-        inert={!open}
-        className={cn(
-          "fixed inset-y-0 right-0 z-[60] flex w-2/3 min-w-[240px] max-w-sm flex-col overflow-y-auto bg-cream text-espresso shadow-[-24px_0_60px_rgba(18,18,18,0.18)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          open ? "translate-x-0" : "translate-x-full",
-        )}
-      >
-        <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-sand-deep" />
-
-        <div className="flex items-center justify-between px-6 pt-5">
-          <Image src="/logo-nobg.png" alt="Culte" width={612} height={179} className="h-10 w-auto" />
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label="Затвори менюто"
-            className="inline-flex size-10 items-center justify-center rounded-full border border-line text-espresso transition-colors hover:bg-sand"
-          >
-            <X size={20} strokeWidth={1.5} />
-          </button>
-        </div>
-
-        <nav aria-label="Мобилна навигация" className="mt-10 px-6">
-          <ul className="space-y-1">
-            {items.map((item, i) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <li
-                  key={item.href}
-                  className={cn("transition-[opacity,translate] duration-500 ease-out", open ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0")}
-                  style={{ transitionDelay: open ? `${120 + i * 60}ms` : "0ms" }}
-                >
-                  <Link href={item.href} aria-current={active ? "page" : undefined} className="group flex items-baseline gap-3 py-2.5">
-                    <span className="w-6 font-sans text-xs text-espresso-soft tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-                    <span
-                      className={cn(
-                        "font-serif text-[2.1rem] leading-none transition-colors",
-                        active ? "text-espresso" : "text-espresso/80 group-hover:text-espresso",
-                      )}
-                    >
-                      {item.label}
-                    </span>
-                    {active && <span aria-hidden className="ml-auto size-2 rounded-full bg-gold" />}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        <div
-          className={cn("mt-auto px-6 pt-10 pb-8 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")}
-          style={{ transitionDelay: open ? `${160 + items.length * 60}ms` : "0ms" }}
-        >
-          <Link href="/booking" className={buttonClass("primary", "lg", "w-full")}>
-            Запази час
-          </Link>
-          {icons.length > 0 && (
-            <ul className="mt-6 flex flex-wrap gap-2" aria-label="Връзка с нас">
-              {icons.map((x) => (
-                <li key={x.label}>
-                  <a
-                    href={x.href}
-                    aria-label={x.label}
-                    title={x.label}
-                    {...(x.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                    className="inline-flex size-10 items-center justify-center rounded-full border border-line text-espresso transition-colors hover:border-gold hover:bg-sand"
-                  >
-                    {x.icon}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-          {contacts.phone && (
-            <a href={`tel:${contacts.phone.replace(/\s+/g, "")}`} className="mt-5 block font-serif text-2xl lining-nums text-espresso">
-              {contacts.phone}
-            </a>
-          )}
-        </div>
-      </div>
+      {panel}
     </div>
   );
 }
