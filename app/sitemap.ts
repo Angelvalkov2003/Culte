@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl();
   const now = new Date();
-  const pages = ["", "/grooming", "/booking", "/shop", "/about", "/contact", "/terms", "/privacy", "/cookies", "/shipping-returns"];
+  const pages = ["", "/grooming", "/gallery", "/booking", "/shop", "/about", "/contact", "/terms", "/privacy", "/cookies", "/shipping-returns"];
   const [products, categories] = await Promise.all([getProducts().catch(() => []), getCategories().catch(() => [])]);
   return [
     ...pages.map((p) => ({

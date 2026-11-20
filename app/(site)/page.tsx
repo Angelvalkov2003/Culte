@@ -4,7 +4,8 @@ import { getCategories, getProducts } from "@/lib/shop/catalog";
 import { ButtonLink } from "@/components/ui/button";
 import { ProductCard } from "@/components/site/product-card";
 import { JsonLd, localBusinessJsonLd } from "@/components/site/json-ld";
-import { DogCutout, PopOut } from "@/components/site/dog-figure";
+import { PopOut } from "@/components/site/dog-figure";
+import { BrandChoiceHero } from "@/components/site/brand-choice-hero";
 import { cn } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -23,39 +24,8 @@ export default async function HomePage() {
     <>
       <JsonLd data={localBusinessJsonLd(s, hours)} />
 
-      {/* Hero: едно платно — марка + една посока + доминантно изображение */}
-      <section aria-labelledby="hero-title" className="relative overflow-hidden bg-sand pattern pattern-bones">
-        <div className="container-page relative grid items-center gap-8 pt-12 pb-0 md:min-h-[min(78vh,700px)] md:grid-cols-12 md:gap-6 md:pt-8">
-          <div className="relative z-10 md:col-span-6 md:pb-14 lg:col-span-5">
-            <p className="font-serif text-[clamp(3.2rem,8vw,5.8rem)] leading-[0.9] tracking-[-0.03em] text-espresso">
-              Culte
-            </p>
-            <h1 id="hero-title" className="mt-5 max-w-[16ch] font-sans text-[clamp(1.25rem,2.4vw,1.7rem)] font-medium leading-snug tracking-normal text-espresso">
-              Груминг салон и козметика за кучета в Пловдив
-            </h1>
-            <p className="mt-4 max-w-[36ch] text-[15px] leading-7 text-espresso/80">
-              Спокойна грижа с едно куче наведнъж и продуктите, които ползваме в салона.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <ButtonLink href="/booking" size="lg" className="text-white hover:text-white">
-                Запази час
-              </ButtonLink>
-              <ButtonLink href="/shop" size="lg" variant="secondary" className="border-espresso/25 bg-transparent">
-                Към магазина
-              </ButtonLink>
-            </div>
-          </div>
-
-          <div className="relative z-10 flex items-end justify-center self-end md:col-span-6 md:justify-end lg:col-span-7">
-            <DogCutout
-              dog="poodleGold"
-              priority
-              sizes="(min-width: 1024px) 420px, (min-width: 768px) 340px, 280px"
-              className="w-[min(78%,300px)] animate-rise md:w-[min(100%,400px)]"
-            />
-          </div>
-        </div>
-      </section>
+      {/* Hero: избор между двата свята — Culte (магазин) и Animal House (груминг) */}
+      <BrandChoiceHero address={s.address} />
 
       {/* Салонът — кратки факти върху бяло */}
       <section aria-label="Салонът" className="container-page mt-20 md:mt-28">

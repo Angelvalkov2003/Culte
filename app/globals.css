@@ -220,3 +220,528 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Hero: избор между Culte (магазин) и Animal House (груминг) ──
+   Границата между двата свята е --seam (ширината на тъмния панел). Регистрирана е, за да се анимира,
+   така че панелите, линията и медальонът се движат заедно. */
+@property --seam {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+.choice {
+  --seam: 50%;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.2, 1);
+  display: flex;
+  min-height: calc(100svh - 72px);
+  transition: --seam 900ms var(--ease-io);
+}
+.choice-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  padding: 5rem 2.5rem;
+  text-align: center;
+  cursor: pointer;
+}
+.choice-panel-dark {
+  flex: 0 0 var(--seam);
+  /* Тъмната „завеса“ се отваря при зареждане. */
+  animation: choice-curtain 1100ms var(--ease-io) both;
+}
+.choice-panel-light {
+  flex: 1 1 0;
+}
+.choice-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 600ms var(--ease-out);
+}
+.choice-eyebrow {
+  margin-top: 1.75rem;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+.choice-title {
+  margin-top: 0.75rem;
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.choice-text {
+  margin-top: 1rem;
+  max-width: 30ch;
+  font-size: 15px;
+  line-height: 1.75rem;
+}
+.choice-img-c {
+  width: min(17vw, 230px);
+}
+.choice-img-ah {
+  width: min(22vw, 290px);
+}
+.choice-index,
+.choice-foot {
+  position: absolute;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  animation: rise 700ms var(--ease-out) 1100ms both;
+}
+.choice-index {
+  top: 2rem;
+  left: 2.5rem;
+}
+.choice-foot {
+  bottom: 2rem;
+  left: 0;
+  right: 0;
+  letter-spacing: 0.16em;
+  font-size: 10.5px;
+}
+.choice-vert,
+.choice-switch {
+  display: none;
+}
+.choice-in {
+  animation: rise 800ms var(--ease-out) var(--d, 0ms) both;
+}
+
+/* Лого: паралакс (обвивка) → увеличение при hover → влизане + плаване (самото изображение). */
+.choice-parallax {
+  transform: translate3d(calc(var(--mx, 0) * var(--depth, 12px)), calc(var(--my, 0) * var(--depth, 12px) * 0.6), 0);
+  transition: transform 500ms var(--ease-out);
+}
+.choice-logo {
+  transition:
+    transform 900ms var(--ease-io),
+    filter 600ms var(--ease-out);
+}
+.choice-glow {
+  filter: drop-shadow(0 0 0 rgba(181, 154, 120, 0));
+}
+.choice-logo-c {
+  animation:
+    choice-c-in 1400ms var(--ease-out) 350ms both,
+    choice-float 7s ease-in-out 1750ms infinite;
+}
+.choice-logo-ah {
+  animation:
+    choice-ah-in 1100ms cubic-bezier(0.3, 1.4, 0.5, 1) 550ms both,
+    choice-float 6s ease-in-out 1650ms infinite;
+}
+
+/* Бутоните */
+.choice-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 3.25rem;
+  padding: 0 1.75rem;
+  border-radius: var(--radius-md);
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color 400ms var(--ease-out),
+    color 400ms var(--ease-out),
+    border-color 400ms var(--ease-out);
+}
+.choice-cta-light {
+  border: 1px solid rgb(255 255 255 / 0.3);
+  color: var(--color-cream);
+}
+.choice-cta-dark {
+  background: var(--color-espresso);
+  color: var(--color-cream);
+}
+.choice-arrow {
+  transition: transform 500ms var(--ease-out);
+}
+
+/* Граница между двата свята: тънка златна линия + медальон */
+.choice-divider {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: var(--seam);
+  width: 1px;
+  background: var(--color-gold);
+  pointer-events: none;
+  transform-origin: top;
+  animation: choice-line 1000ms var(--ease-io) 700ms both;
+}
+.choice-medallion {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: var(--seam);
+  display: grid;
+  place-items: center;
+  width: 116px;
+  height: 116px;
+  border: 1px solid var(--color-gold);
+  border-radius: 9999px;
+  background: var(--color-cream);
+  pointer-events: none;
+  translate: -50% -50%;
+  animation: choice-medallion-in 900ms cubic-bezier(0.3, 1.5, 0.5, 1) 1150ms both;
+}
+.choice-amp {
+  font-size: 2.4rem;
+  transition: rotate 900ms var(--ease-io);
+}
+.choice-ring {
+  animation: choice-spin 28s linear infinite;
+}
+
+/* ── Компютър: hover само при мишка — избраният свят се разширява, другият отстъпва. ── */
+@media (min-width: 768px) {
+  .choice {
+    min-height: min(calc(100svh - 96px), 860px);
+  }
+}
+@media (hover: hover) and (min-width: 768px) {
+  .choice:has(.choice-panel-dark:hover) {
+    --seam: 60%;
+  }
+  .choice:has(.choice-panel-light:hover) {
+    --seam: 40%;
+  }
+  .choice:has(.choice-panel:hover) .choice-panel:not(:hover) .choice-body {
+    opacity: 0.45;
+  }
+  .choice:has(.choice-panel:hover) .choice-panel:not(:hover) .choice-logo {
+    transform: scale(0.92);
+    filter: saturate(0.6);
+  }
+  .choice-panel:hover .choice-logo {
+    transform: scale(1.08);
+  }
+  .choice-panel:hover .choice-glow {
+    filter: drop-shadow(0 0 38px rgba(181, 154, 120, 0.45));
+  }
+  .choice-panel:hover .choice-cta-light {
+    background: var(--color-cream);
+    border-color: var(--color-cream);
+    color: var(--color-espresso);
+  }
+  .choice-panel:hover .choice-cta-dark {
+    background: var(--color-terracotta-dark);
+  }
+  .choice-panel:hover .choice-arrow {
+    transform: translateX(5px);
+  }
+}
+
+/* ── Телефон: две половини една до друга + превключвател в центъра. ──
+   none: 50/50, само лого и име, границата леко „диша“ като подсказка.
+   shop / grooming: избраният свят става ~3/4 и показва текста и бутоните; другият — тясна лента. */
+@media (max-width: 767px) {
+  .choice {
+    height: calc(100svh - 72px);
+    min-height: 580px;
+    max-height: 820px;
+  }
+  .choice[data-choice="none"] {
+    animation: choice-breathe 3.6s ease-in-out 2.2s infinite;
+  }
+  .choice[data-choice="shop"] {
+    --seam: 76%;
+  }
+  .choice[data-choice="grooming"] {
+    --seam: 24%;
+  }
+  .choice-panel {
+    justify-content: center;
+    padding: 3.25rem 0.75rem 6.5rem;
+    cursor: pointer;
+  }
+  .choice-panel[data-state="open"] {
+    cursor: auto;
+  }
+  .choice-foot {
+    display: none;
+  }
+  .choice-index {
+    top: 1.25rem;
+    left: 0;
+    right: 0;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    transition: opacity 400ms var(--ease-out);
+  }
+  .choice-eyebrow {
+    margin-top: 1.25rem;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+  .choice-title {
+    font-size: 1.6rem;
+    transition:
+      font-size 700ms var(--ease-io),
+      opacity 400ms var(--ease-out);
+  }
+  .choice-img-c,
+  .choice-img-ah {
+    transition: width 900ms var(--ease-io);
+  }
+  .choice-img-c {
+    width: 30vw;
+  }
+  .choice-img-ah {
+    width: 38vw;
+  }
+  .choice-eyebrow,
+  .choice-more {
+    display: none;
+  }
+
+  /* Отворен свят. Отстъп откъм границата, за да не застъпва медальонът текста. */
+  .choice-panel-dark[data-state="open"] {
+    padding-right: 2.75rem;
+  }
+  .choice-panel-light[data-state="open"] {
+    padding-left: 2.75rem;
+  }
+  .choice-panel[data-state="open"] .choice-img-c {
+    width: min(40vw, 19svh);
+  }
+  .choice-panel[data-state="open"] .choice-img-ah {
+    width: min(52vw, 24svh);
+  }
+  .choice-panel[data-state="open"] .choice-title {
+    font-size: 2.6rem;
+  }
+  .choice-panel[data-state="open"] .choice-eyebrow,
+  .choice-panel[data-state="open"] .choice-more {
+    display: block;
+  }
+  .choice-panel[data-state="open"] .choice-eyebrow {
+    animation: rise 600ms var(--ease-out) 300ms both;
+  }
+  .choice-panel[data-state="open"] .choice-text {
+    max-width: min(30ch, 64vw);
+    animation: rise 600ms var(--ease-out) 420ms both;
+  }
+  .choice-panel[data-state="open"] .choice-more > div {
+    margin-top: 1.5rem;
+    animation: rise 600ms var(--ease-out) 540ms both;
+  }
+  .choice-panel[data-state="open"] .choice-glow {
+    filter: drop-shadow(0 0 30px rgba(181, 154, 120, 0.4));
+  }
+
+  /* Свит свят: малко лого + вертикален надпис */
+  .choice-panel[data-state="closed"] .choice-img-c,
+  .choice-panel[data-state="closed"] .choice-img-ah {
+    width: 15vw;
+  }
+  .choice-panel[data-state="closed"] {
+    justify-content: flex-start;
+    padding-top: 4.5rem;
+  }
+  /* visibility, не opacity: fill-режимът на входната анимация държи opacity: 1. */
+  .choice-panel[data-state="closed"] .choice-title,
+  .choice-panel[data-state="closed"] .choice-index {
+    visibility: hidden;
+  }
+  .choice-panel[data-state="closed"] .choice-title {
+    position: absolute;
+  }
+  .choice-panel[data-state="closed"] .choice-body {
+    opacity: 0.85;
+  }
+  .choice-panel[data-state="closed"] .choice-vert {
+    display: block;
+    margin-top: 1.25rem;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    animation: rise 600ms var(--ease-out) 350ms both;
+  }
+  .choice-panel-dark[data-state="closed"] .choice-vert {
+    rotate: 180deg;
+  }
+
+  .choice-medallion {
+    top: 44%;
+    width: 78px;
+    height: 78px;
+  }
+  .choice-amp {
+    font-size: 1.7rem;
+  }
+  /* Пълен оборот при избор — „&“ винаги спира изправен. */
+  .choice[data-choice="shop"] .choice-amp {
+    rotate: -360deg;
+  }
+  .choice[data-choice="grooming"] .choice-amp {
+    rotate: 360deg;
+  }
+
+  /* Ниски телефони: без описанието, за да се събере всичко над превключвателя. */
+  @media (max-height: 700px) {
+    .choice-panel[data-state="open"] .choice-text {
+      display: none;
+    }
+  }
+
+  /* Превключвателят в центъра */
+  .choice-switch {
+    position: absolute;
+    z-index: 4;
+    bottom: 1.5rem;
+    left: 50%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: min(290px, calc(100% - 2.5rem));
+    height: 3.25rem;
+    padding: 4px;
+    border: 1px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    background: var(--color-cream);
+    translate: -50% 0;
+    animation:
+      rise 700ms var(--ease-out) 1300ms both,
+      choice-pulse 2.4s ease-out 2.4s infinite;
+  }
+  .choice:not([data-choice="none"]) .choice-switch {
+    animation: none;
+  }
+  .choice-switch button {
+    position: relative;
+    z-index: 1;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-espresso);
+    transition: color 500ms var(--ease-io);
+  }
+  .choice-switch button.is-on {
+    color: var(--color-cream);
+  }
+  .choice-switch-thumb {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: var(--radius-md);
+    background: var(--color-espresso);
+    opacity: 0;
+    scale: 0.6;
+    transition:
+      translate 700ms var(--ease-io),
+      opacity 400ms var(--ease-out),
+      scale 500ms var(--ease-io),
+      background-color 700ms var(--ease-io);
+  }
+  .choice[data-choice="shop"] .choice-switch-thumb,
+  .choice[data-choice="grooming"] .choice-switch-thumb {
+    opacity: 1;
+    scale: 1;
+  }
+  .choice[data-choice="grooming"] .choice-switch-thumb {
+    translate: 100% 0;
+    background: var(--color-terracotta);
+  }
+}
+
+@keyframes choice-curtain {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes choice-line {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes choice-breathe {
+  0%,
+  100% {
+    --seam: 50%;
+  }
+  30% {
+    --seam: 54%;
+  }
+  70% {
+    --seam: 46%;
+  }
+}
+@keyframes choice-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(181 154 120 / 0.55);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 12px rgb(181 154 120 / 0);
+  }
+}
+
+@keyframes choice-c-in {
+  from {
+    opacity: 0;
+    transform: rotate(-24deg) scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes choice-ah-in {
+  from {
+    opacity: 0;
+    transform: translateY(36px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes choice-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes choice-medallion-in {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes choice-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

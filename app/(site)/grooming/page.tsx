@@ -4,8 +4,13 @@ import { getBusinessHours, getSettings, groupHours, listBG } from "@/lib/setting
 import { formatDuration, formatEUR, formatRange } from "@/lib/format";
 import { DOG_SIZES, EXTRA_FEES, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type Service } from "@/lib/types";
 import { serviceDeposit } from "@/lib/booking/deposit";
-import { ButtonLink } from "@/components/ui/button";
+import { ButtonLink, buttonClass } from "@/components/ui/button";
+import { cn } from "@/lib/format";
+import { BEFORE_AFTER, GALLERY } from "@/lib/gallery";
 import Image from "next/image";
+import Link from "next/link";
+
+const GALLERY_TEASER = [BEFORE_AFTER.before, BEFORE_AFTER.after, GALLERY[1]];
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +89,40 @@ export default async function GroomingPage() {
           </dl>
         </div>
       </header>
+
+      {/* Към галерията */}
+      <Link
+        href="/gallery"
+        data-reveal
+        className="group mt-20 grid items-center gap-8 overflow-hidden rounded-lg bg-sand p-6 sm:p-10 md:grid-cols-12"
+      >
+        <div className="md:col-span-5">
+          <p className="text-[11px] font-medium tracking-[0.32em] text-terracotta uppercase">Галерия</p>
+          <h2 className="mt-3 text-[clamp(2rem,4vw,3rem)]">Преди и след</h2>
+          <p className="mt-4 max-w-[36ch] text-[15px] leading-7 text-espresso-soft">
+            Вижте кучетата, които минаха през салона — плъзнете и сравнете преди и след.
+          </p>
+          <span className={buttonClass("primary", "lg", "mt-7")}>
+            Към галерията
+            <svg aria-hidden viewBox="0 0 20 20" className="size-4 transition-transform duration-500 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 10h12M11 5l5 5-5 5" />
+            </svg>
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-3 md:col-span-7">
+          {GALLERY_TEASER.map((p, i) => (
+            <div key={p.src} className={cn("relative aspect-[3/4] overflow-hidden rounded-md", i === 1 && "translate-y-4")}>
+              <Image
+                src={p.src}
+                alt={p.alt}
+                fill
+                sizes="(min-width: 768px) 220px, 30vw"
+                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] group-hover:scale-105"
+              />
+            </div>
+          ))}
+        </div>
+      </Link>
 
       <div className="mt-20 space-y-20">
         {DOG_SIZES.map((size) => {

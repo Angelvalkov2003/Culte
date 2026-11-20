@@ -8,6 +8,7 @@ import { CartLink } from "@/components/site/cart-link";
 
 export const NAV = [
   { href: "/grooming", label: "Груминг" },
+  { href: "/gallery", label: "Галерия" },
   { href: "/shop", label: "Магазин" },
   { href: "/about", label: "За нас" },
   { href: "/contact", label: "Контакти" },
