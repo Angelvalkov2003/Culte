@@ -86,7 +86,7 @@ export function BrandChoiceHero({ address }: { address: string }) {
       </h1>
 
       {/* 01 — Culte, магазин */}
-      <div className="choice-panel choice-panel-dark bg-espresso text-cream" data-state={stateOf("shop")} onClick={pick("shop", "/shop")}>
+      <div className="choice-panel choice-panel-dark pattern pattern-scatter pattern-gold bg-espresso text-cream" data-state={stateOf("shop")} onClick={pick("shop", "/shop")}>
         <span className="choice-index text-gold">01 — Магазин</span>
         <div className="choice-body">
           <div className="choice-parallax" style={{ "--depth": "-16px" } as React.CSSProperties}>

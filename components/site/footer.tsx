@@ -14,7 +14,7 @@ export async function Footer() {
   const [s, hours] = await Promise.all([getSettings(), getBusinessHours()]);
   const tel = s.phone.replace(/\s+/g, "");
   return (
-    <footer className="mt-28 bg-espresso text-cream/70">
+    <footer className="pattern pattern-bones pattern-gold mt-28 bg-espresso text-cream/70">
       <div className="h-1.5 bg-sand-deep" aria-hidden />
       <div className="container-page grid gap-12 py-16 md:grid-cols-12">
         <div className="md:col-span-4">

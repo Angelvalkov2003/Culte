@@ -167,6 +167,25 @@
     --pattern-color: var(--color-cream);
     --pattern-opacity: 0.08;
   }
+  /* Бледо петно с лапички с меки ръбове (PawScatter). */
+  .paw-patch {
+    position: absolute;
+    translate: 0 -50%;
+    background-color: var(--color-espresso);
+    -webkit-mask-image: var(--pattern-image), radial-gradient(closest-side, #000 10%, rgb(0 0 0 / 0.5) 55%, transparent);
+    mask-image: var(--pattern-image), radial-gradient(closest-side, #000 10%, rgb(0 0 0 / 0.5) 55%, transparent);
+    -webkit-mask-size: 420px auto, 100% 100%;
+    mask-size: 420px auto, 100% 100%;
+    -webkit-mask-repeat: repeat, no-repeat;
+    mask-repeat: repeat, no-repeat;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+  /* Златисти лапички върху тъмен фон (hero Culte, футър). */
+  .pattern-gold {
+    --pattern-color: var(--color-gold);
+    --pattern-opacity: 0.11;
+  }
   .link-underline {
     @apply underline decoration-espresso/25 decoration-1 underline-offset-4 transition-colors hover:decoration-espresso;
   }

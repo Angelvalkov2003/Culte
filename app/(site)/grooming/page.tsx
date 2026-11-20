@@ -10,7 +10,7 @@ import { BEFORE_AFTER, GALLERY } from "@/lib/gallery";
 import Image from "next/image";
 import Link from "next/link";
 
-const GALLERY_TEASER = [BEFORE_AFTER.before, BEFORE_AFTER.after, GALLERY[1]];
+const GALLERY_TEASER = [BEFORE_AFTER.before, GALLERY[1], GALLERY[4]];
 
 export const dynamic = "force-dynamic";
 
@@ -36,59 +36,93 @@ export default async function GroomingPage() {
   
   return (
     <div className="container-page pt-12 pb-8">
-      <header className="grid gap-8 md:grid-cols-12">
-        <div className="md:col-span-7">
-          <h1 className="animate-rise text-[clamp(2.4rem,4.6vw,4rem)] leading-[1.05] text-balance">
+      <header className="grid items-center gap-14 md:grid-cols-12 md:gap-8">
+        <div className="md:col-span-6">
+          <p className="animate-rise text-[11px] font-medium tracking-[0.32em] text-terracotta uppercase">Animal House · Груминг салон</p>
+          <h1 className="mt-4 animate-rise text-[clamp(2.6rem,5.6vw,4.6rem)] leading-[1.02] text-balance [animation-delay:80ms]">
             Красотата е в детайла.
-            <span className="mt-1 block font-normal text-espresso-soft">Грижата – в отношението.</span>
+            <span className="mt-2 block font-normal text-terracotta italic">Грижата — в отношението.</span>
           </h1>
-
-          <p className="mt-8 max-w-[52ch] text-[17px] leading-8 text-espresso">
-            Всяко куче е различно. Затова вярваме, че истински добрият груминг започва не с ножицата, а с внимание,
-            разбиране и индивидуален подход.
+          <p className="mt-6 max-w-[38ch] animate-rise text-[17px] leading-8 text-espresso-soft [animation-delay:160ms]">
+            Всяко куче е различно. Затова започваме не с ножицата, а с внимание.
           </p>
-
-          <div className="mt-8 grid max-w-[60ch] gap-5 border-l-2 border-sand-deep pl-5 text-[15px] leading-7 text-espresso-soft sm:pl-6">
-            <p>
-              Аз съм <span className="font-serif text-[1.35em] leading-none text-espresso italic">Стефани</span> и ще се
-              погрижа за Вашия любимец с професионализъм, прецизност и висок клас козметика от{" "}
-              <span className="text-espresso">{listBG(s.cosmetics)}</span>.
-            </p>
-            <p>
-              От първото разресване до последния детайл – всяка стъпка е съобразена с нуждите на козината, кожата и
-              характера на Вашето куче.
-            </p>
+          <div className="mt-8 flex animate-rise flex-wrap items-center gap-x-6 gap-y-3 [animation-delay:240ms]">
+            <ButtonLink href="/booking" size="lg">
+              Запази час
+            </ButtonLink>
+            <a href="#prices" className="link-underline text-[15px]">
+              Услуги и цени
+            </a>
           </div>
-
-          <p className="mt-8 max-w-[34ch] font-serif text-[1.6rem] leading-snug text-espresso italic">
-            Защото грижата не е просто услуга. Тя е отношение.
-          </p>
-
-          <ButtonLink href="/booking" size="lg" className="mt-9">
-            Запази час
-          </ButtonLink>
         </div>
-        <div className="group self-end md:col-span-4 md:col-start-9">
-          <Image
-            src="/salon-logo.png"
-            alt="Animal House — груминг салон"
-            width={537}
-            height={465}
-            priority
-            sizes="(min-width: 768px) 400px, 280px"
-            className="mx-auto h-auto w-full max-w-[280px] md:mx-0 md:max-w-none"
-          />
-          <dl className="mt-6 space-y-2 text-[15px]">
-            {groupHours(hours).map((h) => (
-              <div key={h.label} className="flex justify-between gap-4 border-b border-line py-2">
-                <dt className="text-espresso-soft">{h.label}</dt>
-                <dd className="tabular-nums">{h.value}</dd>
-              </div>
-            ))}
-            <p className="pt-3 text-espresso-soft">{s.address}</p>
-          </dl>
+
+        {/* Снимка + значка Animal House + бележка от грумъра */}
+        <div className="animate-rise pb-10 [animation-delay:200ms] md:col-span-6 md:pb-0">
+          <div className="relative mx-auto aspect-[4/5] w-[min(86%,420px)] md:mr-6 md:ml-auto">
+            <div className="absolute inset-0 overflow-hidden rounded-lg bg-sand">
+              <Image
+                src={BEFORE_AFTER.after.src}
+                alt={BEFORE_AFTER.after.alt}
+                fill
+                priority
+                sizes="(min-width: 768px) 420px, 86vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="absolute -top-6 -right-6 flex size-24 rotate-[10deg] flex-col items-center justify-center rounded-full border border-gold bg-cream text-center shadow-[0_10px_30px_rgba(18,18,18,0.15)] sm:size-28">
+              <span className="font-serif text-[2.6rem] leading-none text-terracotta lining-nums">1</span>
+              <span className="mt-0.5 text-[9px] font-medium tracking-[0.18em] uppercase">
+                куче
+                <br />
+                наведнъж
+              </span>
+            </div>
+            <figure className="pattern pattern-scatter pattern-gold absolute -bottom-10 -left-6 w-[min(78%,270px)] rounded-lg bg-espresso p-5 text-cream shadow-[0_18px_40px_rgba(18,18,18,0.3)] sm:-left-12">
+              <blockquote className="font-serif text-[1.35rem] leading-snug italic">„Грижата не е просто услуга. Тя е отношение.“</blockquote>
+              <figcaption className="mt-3 text-[11px] font-medium tracking-[0.24em] text-gold uppercase">
+                {s.team[0] ?? "Animal House"} · вашият грумър
+              </figcaption>
+            </figure>
+          </div>
         </div>
       </header>
+
+      {/* Три принципа — кратко, вместо дълъг текст */}
+      <ul data-reveal className="mt-24 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
+        {(
+          [
+            ["Внимание", "От първото разресване до последния детайл."],
+            ["Разбиране", "Всяка стъпка — според козината, кожата и характера."],
+            ["Висок клас", `Козметика от ${listBG(s.cosmetics)}.`],
+          ] as const
+        ).map(([title, text], i) => (
+          <li key={title} className="flex items-baseline gap-4 bg-cream p-5 sm:block sm:p-8">
+            <span className="font-serif text-lg text-gold lining-nums tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+            <div>
+              <h2 className="text-[1.6rem] sm:mt-2 sm:text-[1.9rem]">{title}</h2>
+              <p className="mt-1 text-[15px] leading-6 text-espresso-soft sm:mt-2">{text}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Работно време и адрес — една лента */}
+      <div data-reveal className="mt-4 flex flex-col gap-5 rounded-lg bg-sand p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+        <dl className="flex flex-wrap gap-x-10 gap-y-3 text-[15px]">
+          {groupHours(hours).map((h) => (
+            <div key={h.label} className="flex items-baseline gap-3">
+              <dt className="text-espresso-soft">{h.label}</dt>
+              <dd className="font-medium tabular-nums">{h.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="text-[15px] text-espresso-soft">
+          {s.address}.{" "}
+          <a href={s.map_url} target="_blank" rel="noopener noreferrer" className="link-underline text-espresso">
+            Карта
+          </a>
+        </p>
+      </div>
 
       {/* Към галерията */}
       <Link
@@ -124,7 +158,7 @@ export default async function GroomingPage() {
         </div>
       </Link>
 
-      <div className="mt-20 space-y-20">
+      <div id="prices" className="mt-20 scroll-mt-28 space-y-20">
         {DOG_SIZES.map((size) => {
           const list = services.filter((x) => x.size === size && x.group_name !== "extra");
           if (!list.length) return null;

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { GalleryPhoto } from "@/lib/gallery";
 import { cn } from "@/lib/format";
 
@@ -88,13 +89,15 @@ function Lightbox({
     };
   }, [onClose, onGo]);
 
-  return (
+  // Portal в body: иначе main (isolate) държи прозореца под sticky хедъра.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Галерия"
-      className="fixed inset-0 z-[80] flex animate-[lightbox-in_300ms_ease-out_both] flex-col bg-espresso/95"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      className="fixed inset-0 z-[90] flex animate-[lightbox-in_300ms_ease-out_both] flex-col bg-espresso/95"
+      // Клик навсякъде извън снимката и бутоните затваря.
+      onClick={(e) => !(e.target as HTMLElement).closest("img, button") && onClose()}
       onTouchStart={(e) => (touchX.current = e.touches[0].clientX)}
       onTouchEnd={(e) => {
         if (touchX.current === null) return;
@@ -121,22 +124,24 @@ function Lightbox({
         </button>
       </div>
 
-      <div className="relative min-h-0 flex-1" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 sm:px-20">
+        {/* Реалните пропорции: елементът е колкото видимата снимка, така празното място около нея затваря. */}
         <Image
           key={p.src}
           src={p.src}
           alt={p.alt}
-          fill
+          width={p.w}
+          height={p.h}
           sizes="100vw"
-          className="animate-[lightbox-img_350ms_cubic-bezier(0.2,0.7,0.2,1)_both] object-contain px-2 sm:px-20"
-          onClick={(e) => e.stopPropagation()}
+          className="h-auto max-h-[calc(100svh-8.5rem)] w-auto max-w-full animate-[lightbox-img_350ms_cubic-bezier(0.2,0.7,0.2,1)_both] rounded-sm object-contain"
         />
         <NavBtn dir={-1} onGo={onGo} />
         <NavBtn dir={1} onGo={onGo} />
       </div>
 
       <p className="px-4 py-4 text-center text-sm text-cream/70">{p.alt}</p>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

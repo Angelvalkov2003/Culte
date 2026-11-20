@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Mail, Menu, Phone, X } from "lucide-react";
 import { buttonClass } from "@/components/ui/button";
@@ -20,6 +20,7 @@ export type MobileMenuContacts = {
 
 /** Мобилно меню: чекмедже отдясно; overlay/panel през portal, за да не ги чупи sticky+backdrop-blur на header-а. */
 const NO_CONTACTS: MobileMenuContacts = { phone: "", email: "", instagram: "", facebook: "", tiktok: "" };
+const noopSubscribe = () => () => {};
 
 export function MobileMenu({
   items,
@@ -29,7 +30,8 @@ export function MobileMenu({
   contacts?: MobileMenuContacts;
 }) {
   const [open, setOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  // true само в браузъра (portal-ът няма document на сървъра); без setState в effect.
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const pathname = usePathname();
   const [lastPath, setLastPath] = useState(pathname);
 
@@ -37,10 +39,6 @@ export function MobileMenu({
     setLastPath(pathname);
     setOpen(false);
   }
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +80,7 @@ export function MobileMenu({
           aria-label="Меню"
           inert={!open}
           className={cn(
-            "fixed inset-y-0 right-0 z-[60] flex w-2/3 min-w-[240px] max-w-sm flex-col overflow-y-auto bg-cream text-espresso shadow-[-24px_0_60px_rgba(18,18,18,0.18)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
+            "pattern pattern-scatter fixed inset-y-0 right-0 z-[60] flex w-2/3 min-w-[240px] max-w-sm flex-col overflow-y-auto bg-cream text-espresso shadow-[-24px_0_60px_rgba(18,18,18,0.18)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
             open ? "translate-x-0" : "translate-x-full",
           )}
         >
