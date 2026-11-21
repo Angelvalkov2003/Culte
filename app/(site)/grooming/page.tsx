@@ -69,14 +69,6 @@ export default async function GroomingPage() {
                 className="object-cover"
               />
             </div>
-            <div className="absolute -top-6 -right-6 flex size-24 rotate-[10deg] flex-col items-center justify-center rounded-full border border-gold bg-cream text-center shadow-[0_10px_30px_rgba(18,18,18,0.15)] sm:size-28">
-              <span className="font-serif text-[2.6rem] leading-none text-terracotta lining-nums">1</span>
-              <span className="mt-0.5 text-[9px] font-medium tracking-[0.18em] uppercase">
-                куче
-                <br />
-                наведнъж
-              </span>
-            </div>
             <figure className="pattern pattern-scatter pattern-gold absolute -bottom-10 -left-6 w-[min(78%,270px)] rounded-lg bg-espresso p-5 text-cream shadow-[0_18px_40px_rgba(18,18,18,0.3)] sm:-left-12">
               <blockquote className="font-serif text-[1.35rem] leading-snug italic">„Грижата не е просто услуга. Тя е отношение.“</blockquote>
               <figcaption className="mt-3 text-[11px] font-medium tracking-[0.24em] text-gold uppercase">

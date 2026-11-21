@@ -109,9 +109,6 @@ export function BrandChoiceHero({ address }: { address: string }) {
             Culte
           </h2>
           <div className="choice-more">
-            <p className="choice-in choice-text text-cream/70" style={{ "--d": "850ms" } as React.CSSProperties}>
-              Продуктите, които ползваме в салона — за вкъщи, между двете посещения.
-            </p>
             <div className="choice-in mt-8" style={{ "--d": "950ms" } as React.CSSProperties}>
               <Link href="/shop" className="choice-cta choice-cta-light">
                 Към магазина
@@ -154,9 +151,6 @@ export function BrandChoiceHero({ address }: { address: string }) {
             Animal House
           </h2>
           <div className="choice-more">
-            <p className="choice-in choice-text text-espresso/70" style={{ "--d": "900ms" } as React.CSSProperties}>
-              Спокойна грижа с едно куче наведнъж — баня, подсушаване и подстригване.
-            </p>
             <div
               className="choice-in mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-4"
               style={{ "--d": "1000ms" } as React.CSSProperties}

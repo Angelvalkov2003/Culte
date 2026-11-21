@@ -170,7 +170,7 @@ export default async function HomePage() {
             <div>
               <p className="text-sm text-espresso-soft">Разгледайте нашите професионални продукти</p>
               <h2 id="shop-title" className="mt-3 max-w-lg text-4xl">
-                От рафта в салона до вашата баня
+                Професионалната грижа вече е у дома.
               </h2>
             </div>
             <Link href="/shop" className="link-underline text-[15px]">
