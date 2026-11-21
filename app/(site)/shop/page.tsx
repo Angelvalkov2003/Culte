@@ -3,9 +3,10 @@ import Link from "next/link";
 import { getCategories, getProducts, type ProductSort } from "@/lib/shop/catalog";
 import { cn } from "@/lib/format";
 import { ProductCard } from "@/components/site/product-card";
-import { Input, Select } from "@/components/ui/field";
+import { Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { FiltersToggle } from "@/components/shop/filters-toggle";
+import { SortSelect } from "@/components/shop/sort-select";
 import { DogCutout } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
@@ -68,7 +69,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       </header>
 
       <div className="mt-12 grid gap-10 lg:grid-cols-12">
-        <aside className="lg:col-span-3" aria-label="Филтри">
+        <aside className="relative z-10 lg:col-span-3" aria-label="Филтри">
           <FiltersToggle active={filtered}>
           <form action="/shop" method="get" className="space-y-8 lg:sticky lg:top-24">
             {sp.category && <input type="hidden" name="category" value={sp.category} />}
@@ -114,18 +115,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               </div>
             </fieldset>
 
-            <div>
-              <label htmlFor="sort" className="text-sm font-medium">
-                Подреждане
-              </label>
-              <Select id="sort" name="sort" defaultValue={sort} className="mt-2">
-                {SORTS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {s.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
+            <SortSelect name="sort" label="Подреждане" options={SORTS} defaultValue={sort} />
 
             <div className="flex gap-3">
               <Button type="submit" size="sm">
