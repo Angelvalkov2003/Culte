@@ -7,7 +7,7 @@ import { PopOut } from "@/components/site/dog-figure";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "За нас",
-  description: "Culte — груминг салон в Пловдив, в който работим с едно куче наведнъж, и магазин за козметика за кучета.",
+  description: "Culte — груминг салон в Пловдив, в който работим с едно куче наведнъж, и магазин за козметика за животни.",
   alternates: { canonical: "/about" },
 };
 

@@ -279,7 +279,7 @@ export async function createShipment(i: ShipmentInput): Promise<ShipmentResult> 
       content: {
         parcelsCount: 1,
         totalWeight: SPEEDY_WEIGHT_KG,
-        contents: `Козметика за кучета, поръчка ${i.orderNumber}`.slice(0, 100),
+        contents: `Козметика за животни, поръчка ${i.orderNumber}`.slice(0, 100),
         package: "BOX",
       },
       payment: { courierServicePayer: "SENDER" },

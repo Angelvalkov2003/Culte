@@ -41,9 +41,9 @@ export const SERVICE_GROUP_LABEL: Record<ServiceGroup, string> = {
   extra: "Допълнителни услуги",
 };
 export const SIZE_HINT: Record<DogSize, string> = {
-  small: "До 5 кг",
-  medium: "До 15 кг",
-  large: "До 25 кг",
+  small: "Под 5 кг",
+  medium: "5–15 кг",
+  large: "Над 15 кг",
 };
 /** Такси и услуги, които не се записват онлайн — показват се в ценоразписа. */
 export const EXTRA_FEES: { name: string; price: string; note?: string }[] = [
@@ -237,9 +237,9 @@ export interface OrderItem {
 }
 
 export const SIZE_LABEL: Record<DogSize, string> = {
-  small: "Малки кучета",
-  medium: "Средни кучета",
-  large: "Големи кучета",
+  small: "Малки породи",
+  medium: "Средни породи",
+  large: "Големи породи",
 };
 
 export const BOOKING_STATUS_LABEL: Record<BookingStatus, string> = {

@@ -20,11 +20,11 @@ const onest = Onest({
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
-    default: "Culte — груминг салон и козметика за кучета в Пловдив",
+    default: "Culte — груминг салон и козметика за животни в Пловдив",
     template: "%s | Culte",
   },
   description:
-    "Груминг салон Culte в Пловдив: онлайн запазване на час, внимателна грижа за всяка порода и подбрана козметика за кучета.",
+    "Груминг салон Culte в Пловдив: онлайн запазване на час, внимателна грижа за всяка порода и подбрана козметика за животни.",
   applicationName: "Culte",
   openGraph: {
     type: "website",

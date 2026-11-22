@@ -82,7 +82,7 @@ export function BrandChoiceHero({ address }: { address: string }) {
       className="choice relative overflow-hidden bg-sand"
     >
       <h1 id="hero-title" className="sr-only">
-        Culte — козметика за кучета и Animal House — груминг салон в Пловдив
+        Culte — козметика за животни и Animal House — груминг салон в Пловдив
       </h1>
 
       {/* 01 — Culte, магазин */}
@@ -103,7 +103,7 @@ export function BrandChoiceHero({ address }: { address: string }) {
             </div>
           </div>
           <p className="choice-in choice-eyebrow text-gold" style={{ "--d": "650ms" } as React.CSSProperties}>
-            Козметика за кучета
+            Козметика за животни
           </p>
           <h2 className="choice-in choice-title" style={{ "--d": "750ms" } as React.CSSProperties}>
             Culte
@@ -145,7 +145,7 @@ export function BrandChoiceHero({ address }: { address: string }) {
             </div>
           </div>
           <p className="choice-in choice-eyebrow text-terracotta" style={{ "--d": "700ms" } as React.CSSProperties}>
-            Груминг салон в Пловдив
+            Нашият груминг
           </p>
           <h2 className="choice-in choice-title" style={{ "--d": "800ms" } as React.CSSProperties}>
             Animal House

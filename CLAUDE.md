@@ -1,4 +1,4 @@
-# Culte — груминг салон + магазин за козметика за кучета
+# Culte — груминг салон + магазин за козметика за животни
 
 Next.js 16 (App Router, TS, Server Actions) · Tailwind 4 · Supabase · Stripe Checkout · Resend + React Email · Cloudinary. UI само на български, EUR, TZ Europe/Sofia.
 

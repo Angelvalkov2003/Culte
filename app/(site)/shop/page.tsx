@@ -17,7 +17,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const { category } = await searchParams;
   const cat = category ? (await getCategories()).find((c) => c.slug === category) : null;
   return {
-    title: cat ? `${cat.name} за кучета` : "Магазин за козметика за кучета",
+    title: cat ? `${cat.name} за кучета` : "Магазин за козметика за животни",
     description: cat?.description || "Шампоани, балсами, парфюми и инструменти за грижа за козината. Доставка в цяла България.",
     alternates: { canonical: cat ? `/shop?category=${cat.slug}` : "/shop" },
   };
