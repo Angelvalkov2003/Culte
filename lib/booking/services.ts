@@ -3,7 +3,7 @@ import { hasSupabase } from "@/lib/env";
 import { publicDb } from "@/lib/supabase/public";
 import { round2 } from "@/lib/format";
 import { serviceDeposit } from "@/lib/booking/deposit";
-import type { DogSize, Service } from "@/lib/types";
+import { addonsFor, type DogSize, type Service } from "@/lib/types";
 
 export async function getActiveServices(): Promise<Service[]> {
   if (!hasSupabase()) return [];
@@ -54,6 +54,6 @@ export async function resolveServices(
   const main = rows.find((s) => s.id === mainId);
   if (!main || main.size !== size || main.is_addon) return null;
   const addons = addonIds.map((id) => rows.find((s) => s.id === id));
-  if (addons.some((a) => !a || a.size !== size || a.id === mainId || !(a.is_addon || a.addon_allowed))) return null;
+  if (addons.some((a) => !a || !addonsFor([a], size, mainId).length)) return null;
   return { main, addons: addons as Service[] };
 }

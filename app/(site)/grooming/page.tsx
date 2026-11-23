@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getActiveServices } from "@/lib/booking/services";
 import { getBusinessHours, getSettings, groupHours, listBG } from "@/lib/settings";
 import { formatDuration, formatEUR, formatRange } from "@/lib/format";
-import { DOG_SIZES, EXTRA_FEES, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type Service } from "@/lib/types";
+import { PET_SIZES, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SHARED_SIZE, SIZE_HINT, SIZE_LABEL, type Service } from "@/lib/types";
 import { serviceDeposit } from "@/lib/booking/deposit";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/format";
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 
 export default async function GroomingPage() {
   const [services, s, hours] = await Promise.all([getActiveServices(), getSettings(), getBusinessHours()]);
-  // Допълнителните услуги се повтарят за всеки размер — показваме ги веднъж, с диапазон на цената, ако се различава.
-  const extras = [...services.filter((x) => x.group_name === "extra").reduce((m, x) => {
+  // Общата категория + допълнителните услуги по размер (показват се веднъж, с диапазон на цената, ако се различава).
+  const extras = [...services.filter((x) => x.size === SHARED_SIZE || x.group_name === "extra").reduce((m, x) => {
     const prev = m.get(x.name);
     m.set(x.name, prev ? {
       ...prev,
@@ -151,7 +151,7 @@ export default async function GroomingPage() {
       </Link>
 
       <div id="prices" className="mt-20 scroll-mt-28 space-y-20">
-        {DOG_SIZES.map((size) => {
+        {PET_SIZES.map((size) => {
           const list = services.filter((x) => x.size === size && x.group_name !== "extra");
           if (!list.length) return null;
           return (
@@ -189,24 +189,14 @@ export default async function GroomingPage() {
 
       <section data-reveal aria-labelledby="extras-title" className="mt-20 grid gap-6 md:grid-cols-12">
           <h2 id="extras-title" className="text-4xl md:col-span-3">
-            {SERVICE_GROUP_LABEL.extra}
+            {SIZE_LABEL[SHARED_SIZE]}
             <span className="mt-2 block font-sans text-[15px] font-medium text-espresso-soft">За всеки размер</span>
           </h2>
           <div className="md:col-span-9">
             <table className="w-full text-left text-[15px]">
-              <caption className="sr-only">{SERVICE_GROUP_LABEL.extra}</caption>
+              <caption className="sr-only">{SIZE_LABEL[SHARED_SIZE]}</caption>
               <tbody>
                 {extras.map((x) => <ServiceRow key={x.id} x={x} depositPercent={s.deposit_percent} />)}
-                {EXTRA_FEES.map((fee) => (
-                  <tr key={fee.name} className="border-b border-line align-top">
-                    <td className="py-3.5 pr-4">
-                      <span className="font-medium">{fee.name}</span>
-                      {fee.note && <span className="mt-0.5 block text-sm text-espresso-soft">{fee.note[0].toUpperCase() + fee.note.slice(1)}</span>}
-                    </td>
-                    <td className="hidden sm:table-cell" />
-                    <td className="py-3.5 text-right whitespace-nowrap tabular-nums">{fee.price}</td>
-                  </tr>
-                ))}
               </tbody>
             </table>
           </div>

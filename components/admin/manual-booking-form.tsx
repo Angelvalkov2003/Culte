@@ -6,14 +6,15 @@ import { ActionForm, SubmitButton } from "@/components/admin/action-form";
 import { Panel } from "@/components/admin/ui";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { formatRange } from "@/lib/format";
-import { DOG_SIZES, SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
+import { addonsFor, DOG_SIZES, SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
 
 export function ManualBookingForm({ services, defaultDate, defaultTime }: { services: Service[]; defaultDate: string; defaultTime: string }) {
   const [size, setSize] = useState<DogSize>("small");
   const [mainId, setMainId] = useState("");
   const [addons, setAddons] = useState<string[]>([]);
   const sized = services.filter((s) => s.size === size);
-  const chosen = sized.filter((s) => s.id === mainId || addons.includes(s.id));
+  const extras = addonsFor(services, size, mainId);
+  const chosen = services.filter((s) => s.id === mainId || addons.includes(s.id));
   const duration = chosen.reduce((a, s) => a + s.duration_max, 0);
 
   return (
@@ -35,7 +36,7 @@ export function ManualBookingForm({ services, defaultDate, defaultTime }: { serv
             <fieldset>
               <legend className="text-sm font-medium">Допълнителни</legend>
               <div className="mt-2 space-y-1.5">
-                {sized.filter((s) => s.id !== mainId && (s.is_addon || s.addon_allowed)).map((s) => (
+                {extras.map((s) => (
                   <label key={s.id} className="flex items-center gap-2 text-sm">
                     <input type="checkbox" name="addon_ids[]" value={s.id} checked={addons.includes(s.id)} className="size-4 accent-terracotta"
                       onChange={() => setAddons((a) => (a.includes(s.id) ? a.filter((x) => x !== s.id) : [...a, s.id]))} />

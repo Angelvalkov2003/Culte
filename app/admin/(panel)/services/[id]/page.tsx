@@ -73,7 +73,7 @@ export default async function ServiceEdit({ params }: { params: Promise<{ id: st
           </label>
           <label className="flex items-center gap-2">
             <input type="checkbox" name="addon_allowed" defaultChecked={s?.addon_allowed ?? false} className="size-4 accent-terracotta" />
-            Може да се добави към друга услуга
+            Може да се добави към друга услуга (от „{SIZE_LABEL.other}“ — излиза при всички размери)
           </label>
           <label className="flex items-center gap-2">
             <input type="checkbox" name="is_active" defaultChecked={s?.is_active ?? true} className="size-4 accent-terracotta" />

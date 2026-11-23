@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Textarea } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn, formatDuration, formatEUR, formatMinutes, formatRange } from "@/lib/format";
-import { DOG_SIZES, PRICE_NOTE, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SIZE_HINT, SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
+import { addonsFor, DOG_SIZES, PRICE_NOTE, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SHARED_SIZE, SIZE_HINT, SIZE_LABEL, type DogSize, type Service } from "@/lib/types";
 import { isRangePrice, serviceDeposit } from "@/lib/booking/deposit";
 import { BookingCalendar } from "@/components/booking/booking-calendar";
 import { revealFirstError, scrollToTop } from "@/lib/scroll";
@@ -18,6 +18,7 @@ const SIZE_BREEDS: Record<DogSize, string> = {
   small: "Той пудел, йоркширски териер, померан, пекинез, ши тцу",
   medium: "Мини и среден пудел, малтипу, болонка, шнауцер, кокер шпаньол",
   large: "Стандартен пудел, бигъл, бордър коли, самоед",
+  other: "Подстригване на котка, почистване на зъбен камък, рязане на нокти, чистене на уши",
 };
 const GROUPS = SERVICE_GROUPS;
 
@@ -73,11 +74,12 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
   const sized = useMemo(() => services.filter((s) => s.size === size), [services, size]);
   const mains = sized.filter((s) => !s.is_addon);
   const main = sized.find((s) => s.id === mainId) ?? null;
-  const extras = sized.filter((s) => s.id !== mainId && (s.is_addon || s.addon_allowed));
+  const extras = size ? addonsFor(services, size, mainId) : [];
   const chosen = useMemo(
-    () => (main ? [main, ...addonIds.map((id) => sized.find((s) => s.id === id)).filter((s): s is Service => !!s)] : []),
-    [main, addonIds, sized],
+    () => (main ? [main, ...addonIds.map((id) => services.find((s) => s.id === id)).filter((s): s is Service => !!s)] : []),
+    [main, addonIds, services],
   );
+  const isPet = size === SHARED_SIZE;
 
   const totals = useMemo(() => {
     const from = chosen.reduce((s, x) => s + Number(x.price_from), 0);
@@ -145,7 +147,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
     if (form.name.trim().length < 2) e.name = "Въведете име";
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) e.email = "Въведете валиден имейл";
     if (!/^[+\d][\d\s()-]{6,20}$/.test(form.phone.trim())) e.phone = "Въведете валиден телефон";
-    if (!form.dogName.trim()) e.dogName = "Въведете името на кучето";
+    if (!form.dogName.trim()) e.dogName = isPet ? "Въведете името на любимеца" : "Въведете името на кучето";
     if (form.dogBreed.trim().length < 2) e.dogBreed = "Въведете породата";
     if (!form.terms) e.terms = "Необходимо е съгласие с условията";
     setErrors(e);
@@ -201,7 +203,10 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
           {step === 0 && (
             <fieldset>
               <legend className="font-serif text-3xl">Колко е голямо кучето ви?</legend>
-              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <p className="mt-2 text-[15px] text-espresso-soft">
+                За котки и отделни услуги като зъбен камък, нокти или уши изберете „{SIZE_LABEL[SHARED_SIZE]}“.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {DOG_SIZES.map((s) => (
                   <button
                     key={s}
@@ -213,11 +218,20 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                       size === s ? "border-espresso bg-sand" : "border-line bg-cream hover:border-espresso/30",
                     )}
                   >
-                    <span>
-                      <span className="block font-serif text-2xl">{SIZE_LABEL[s]}</span>
-                      <span className="mt-1 block text-[15px] font-medium">{SIZE_HINT[s]}</span>
-                    </span>
-                    <span className="text-sm leading-6 text-espresso-soft">{SIZE_BREEDS[s]}</span>
+                    {s === SHARED_SIZE ? (
+                      <span>
+                        <span className="block font-serif text-2xl">{SIZE_LABEL[s]}</span>
+                        <span className="mt-2 block text-sm leading-6 text-espresso-soft">{SIZE_BREEDS[s]}</span>
+                      </span>
+                    ) : (
+                      <>
+                        <span>
+                          <span className="block font-serif text-2xl">{SIZE_LABEL[s]}</span>
+                          <span className="mt-1 block text-[15px] font-medium">{SIZE_HINT[s]}</span>
+                        </span>
+                        <span className="text-sm leading-6 text-espresso-soft">{SIZE_BREEDS[s]}</span>
+                      </>
+                    )}
                   </button>
                 ))}
               </div>
@@ -403,11 +417,11 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
                   <Input id="email" type="email" autoComplete="email" value={form.email} aria-invalid={!!errors.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })} />
                 </Field>
-                <Field label="Име на кучето" htmlFor="dogName" error={errors.dogName}>
+                <Field label={isPet ? "Име на любимеца" : "Име на кучето"} htmlFor="dogName" error={errors.dogName}>
                   <Input id="dogName" value={form.dogName} aria-invalid={!!errors.dogName}
                     onChange={(e) => setForm({ ...form, dogName: e.target.value })} />
                 </Field>
-                <Field label="Порода" htmlFor="dogBreed" error={errors.dogBreed}>
+                <Field label={isPet ? "Вид и порода" : "Порода"} htmlFor="dogBreed" error={errors.dogBreed}>
                   <Input id="dogBreed" value={form.dogBreed} aria-invalid={!!errors.dogBreed}
                     onChange={(e) => setForm({ ...form, dogBreed: e.target.value })} />
                 </Field>
@@ -437,7 +451,7 @@ export function BookingWizard({ services, depositPercent }: { services: Service[
               <dl className="mt-6 grid gap-x-8 gap-y-3 text-[15px] sm:grid-cols-[10rem_1fr]">
                 <dt className="text-espresso-soft">Кога</dt>
                 <dd>{date && new Intl.DateTimeFormat("bg-BG", { weekday: "long", day: "numeric", month: "long" }).format(new Date(`${date}T12:00:00`))}, {time}</dd>
-                <dt className="text-espresso-soft">Куче</dt>
+                <dt className="text-espresso-soft">{isPet ? "Любимец" : "Куче"}</dt>
                 <dd>{form.dogName}, {form.dogBreed} ({size && SIZE_LABEL[size].toLowerCase()})</dd>
                 <dt className="text-espresso-soft">Контакт</dt>
                 <dd>{form.name}, {form.phone}, {form.email}</dd>
