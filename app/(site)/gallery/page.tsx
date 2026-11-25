@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/format";
-import { BEFORE_AFTER, GALLERY } from "@/lib/gallery";
+import { BEFORE_AFTER, GALLERY, HALLOWEEN_PHOTO } from "@/lib/gallery";
 import { BeforeAfter } from "@/components/site/before-after";
 import { GalleryGrid } from "@/components/site/gallery-grid";
 import { ButtonLink } from "@/components/ui/button";
@@ -59,8 +59,8 @@ export default function GalleryPage() {
       >
         <div className="relative mx-auto h-[300px] w-[280px] sm:h-[340px] sm:w-[340px] md:col-span-5 md:h-[380px] md:w-full">
           <Polaroid
-            src={GALLERY[1].src}
-            alt={GALLERY[1].alt}
+            src={HALLOWEEN_PHOTO.src}
+            alt={HALLOWEEN_PHOTO.alt}
             caption="Хелоуин"
             className="top-6 left-[4%] -rotate-[9deg] group-hover:-translate-x-4 group-hover:-rotate-[14deg]"
           />

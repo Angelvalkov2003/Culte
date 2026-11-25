@@ -20,17 +20,17 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook   # копирай�
    От Project Settings → API вземете URL, publishable (или anon) ключа и service role ключа.
 2. **Vercel.** Import на GitHub репото → Framework: Next.js. В Settings → Environment Variables добавете всички имена от
    `.env.example`:
-   - `NEXT_PUBLIC_SITE_URL` = продукционният домейн (напр. `https://culte.bg`)
-   - `ADMIN_PASSWORD` (силна парола), `ADMIN_SESSION_SECRET` и `CRON_SECRET` (случайни низове, `openssl rand -base64 32`)
+   - Домейнът е хардкоднат в `lib/site-url.ts` (`https://culte.eu`)
+   - `ADMIN_PASSWORD` (силна парола), `ADMIN_SESSION_SECRET` (случаен низ, `openssl rand -base64 32`)
    - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` може да остане празно — взима се от `CLOUDINARY_URL`.
 3. **Stripe webhook.** Dashboard → Developers → Webhooks → Add endpoint:
-   `https://<домейн>/api/stripe/webhook`, събития `checkout.session.completed`, `checkout.session.expired`,
+   `https://culte.eu/api/stripe/webhook`, събития `checkout.session.completed`, `checkout.session.expired`,
    `checkout.session.async_payment_succeeded`. Signing secret → `STRIPE_WEBHOOK_SECRET` във Vercel. За live режим сменете
    и `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` с live ключове.
 4. **Resend.** Domains → Add domain → добавете DNS записите → след верификация сменете
    `EMAIL_FROM="Culte <hello@вашия-домейн>"`. Дотогава `onboarding@resend.dev` праща само до имейла на собственика на акаунта.
-5. **Cron.** `vercel.json` пуска `/api/cron/reminders` всеки ден в 07:00 UTC (напомняне за утрешните часове).
-   Vercel праща `Authorization: Bearer $CRON_SECRET` автоматично.
+5. **Без cron** (безплатен Vercel план). Напомнянията за утрешните часове и GDPR почистването се пускат с бутона
+   „Напомняния за утре и почистване“ на таблото в админа — веднъж дневно.
 6. Redeploy след промяна на env променливи.
 
 ## Админ панел

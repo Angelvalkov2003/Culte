@@ -1,4 +1,5 @@
 import "server-only";
+import { boxnowFreeActive } from "@/lib/shipping/boxnow-promo";
 
 /**
  * BoxNow Partner API (България). Отделно от Speedy — никакви общи endpoints.
@@ -6,7 +7,7 @@ import "server-only";
  * - Auth: POST /api/v1/auth-sessions (client_credentials), токен 1 час.
  * - Автомати: публичен JSON locationapi-*.boxnow.bg/v1/apms_bg-BG.json (без auth).
  * - Пратка: POST /api/v1/delivery-requests; етикет: GET /api/v1/parcels/{id}/label.pdf.
- * - Няма API за цена → фиксирана цена за клиента (BOXNOW_PRICE).
+ * - Няма API за цена → фиксирана цена за клиента (BOXNOW_PRICE); промоция „безплатно до“ в boxnow-promo.ts.
  * - Телефон в международен формат (+359…), суми като низ с 2 знака.
  */
 
@@ -30,10 +31,11 @@ export function boxnowConfigured(): boolean {
   );
 }
 
-/** Цена на доставката за клиента, EUR (по договор с BoxNow). */
+/** Цена на доставката за клиента, EUR (по договор с BoxNow). По време на промоцията → 0. */
 export function boxnowPrice(): number {
+  if (boxnowFreeActive()) return 0;
   const v = Number(String(process.env.BOXNOW_PRICE ?? "").replace(",", "."));
-  return Number.isFinite(v) && v >= 0 && String(process.env.BOXNOW_PRICE ?? "").trim() !== "" ? Math.round(v * 100) / 100 : 3.9;
+  return Number.isFinite(v) && v >= 0 && String(process.env.BOXNOW_PRICE ?? "").trim() !== "" ? Math.round(v * 100) / 100 : 1.28;
 }
 
 export function boxnowPartnerId(): string | null {

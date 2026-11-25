@@ -206,10 +206,11 @@ export function ShippingPicker({
       t.push({ id: "speedy_apt", label: "Speedy автомат", hint: "Вземате от автомат на Speedy" });
       t.push({ id: "speedy_address", label: "Speedy адрес", hint: "Куриер до вашия адрес" });
     }
-    if (boxnow.enabled) t.push({ id: "boxnow", label: "BoxNow", hint: "Автомат BoxNow, денонощно" });
+    if (boxnow.enabled)
+      t.push({ id: "boxnow", label: "BoxNow", hint: boxnow.price === 0 ? "Автомат BoxNow · безплатна доставка" : "Автомат BoxNow, денонощно" });
     for (const m of manualMethods) t.push({ id: `manual:${m.id}`, label: m.name, hint: m.description });
     return t;
-  }, [speedyEnabled, boxnow.enabled, manualMethods]);
+  }, [speedyEnabled, boxnow.enabled, boxnow.price, manualMethods]);
 
   const [tab, setTab] = useState<Tab | null>(tabs[0]?.id ?? null);
   const [site, setSite] = useState<Site | null>(null);

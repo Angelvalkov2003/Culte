@@ -4,6 +4,8 @@ import { formatEUR, round2 } from "@/lib/format";
 import { addDaysISO, fmt, formatTime, sofiaToDate, todaySofia } from "@/lib/time";
 import { BOOKING_STATUS_LABEL, ORDER_STATUS_LABEL, type Booking, type Order, type Product } from "@/lib/types";
 import { Empty, PageHeader, Panel, StatusBadge } from "@/components/admin/ui";
+import { ActionForm, SubmitButton } from "@/components/admin/action-form";
+import { runMaintenance } from "@/app/admin/_actions/maintenance";
 
 export default async function Dashboard() {
   const today = todaySofia();
@@ -28,7 +30,16 @@ export default async function Dashboard() {
 
   return (
     <>
-      <PageHeader title="Табло">{fmt(new Date(), "EEEE, d MMMM yyyy")}</PageHeader>
+      <PageHeader
+        title="Табло"
+        actions={
+          <ActionForm action={runMaintenance}>
+            <SubmitButton variant="secondary">Напомняния за утре и почистване</SubmitButton>
+          </ActionForm>
+        }
+      >
+        {fmt(new Date(), "EEEE, d MMMM yyyy")}
+      </PageHeader>
 
       <dl className="mb-8 grid gap-3 sm:grid-cols-3">
         <div className="rounded-lg bg-sand p-5">

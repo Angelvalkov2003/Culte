@@ -26,7 +26,6 @@ export const env = {
   emailFrom: () => read("EMAIL_FROM") || "Culte <onboarding@resend.dev>",
   adminPassword: () => required("ADMIN_PASSWORD"),
   adminSecret: () => required("ADMIN_SESSION_SECRET"),
-  cronSecret: () => read("CRON_SECRET"),
   cloudinaryUrl: () => read("CLOUDINARY_URL"),
 };
 
@@ -38,7 +37,7 @@ export function siteUrl(): string {
 const HOST_RE = /^[a-z0-9.-]+(:\d{1,5})?$/i;
 
 /**
- * Адресът, от който е дошла текущата заявка (напр. https://culte-beta.vercel.app или http://localhost:3000).
+ * Адресът, от който е дошла текущата заявка (напр. https://culte.eu или http://localhost:3000).
  * Ползва се за success/cancel адресите на Stripe, за да връща клиента на същия домейн.
  * Извън заявка или при невалиден хост → siteUrl().
  */

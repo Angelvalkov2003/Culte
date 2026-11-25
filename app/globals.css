@@ -301,6 +301,7 @@
   max-width: 30ch;
   font-size: 15px;
   line-height: 1.75rem;
+  text-wrap: balance;
 }
 .choice-img-c {
   width: min(17vw, 230px);

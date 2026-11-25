@@ -1,23 +1,17 @@
-import { NextResponse, type NextRequest } from "next/server";
+import "server-only";
 import { db } from "@/lib/supabase/admin";
-import { env } from "@/lib/env";
-import { safeEqual } from "@/lib/admin/token";
 import { sendEmail } from "@/lib/email";
 import { expireStaleBookings } from "@/lib/booking/availability";
 import { addDaysISO, formatTime, sofiaToDate, todaySofia } from "@/lib/time";
 import type { Booking } from "@/lib/types";
 import { BookingReminderEmail } from "@/emails/booking-emails";
 
-export const dynamic = "force-dynamic";
-
-// Vercel Cron (веднъж дневно): напомняне за утрешните часове. Защитено с CRON_SECRET.
-export async function GET(req: NextRequest) {
-  const secret = env.cronSecret();
-  const auth = req.headers.get("authorization") ?? "";
-  if (!secret || !safeEqual(auth, `Bearer ${secret}`)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+/**
+ * Ежедневна поддръжка — пуска се САМО от бутон в админа (без cron; безплатният Vercel план).
+ * Изтекли неплатени резервации, GDPR почистване и напомняне за утрешните часове.
+ * Безопасно е да се натиска многократно: напомнянето се маркира преди изпращане.
+ */
+export async function runDailyMaintenance(): Promise<{ sent: number; cleaned: unknown }> {
   await expireStaleBookings();
   const { data: cleaned, error: cleanErr } = await db().rpc("cleanup_stale_data", { p_days: 30 });
   if (cleanErr) console.error("cleanup_stale_data", cleanErr.message);
@@ -33,11 +27,11 @@ export async function GET(req: NextRequest) {
     .neq("customer_email", "")
     .gte("start_at", from)
     .lt("start_at", to);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) throw new Error(error.message);
 
   let sent = 0;
   for (const b of (data ?? []) as Booking[]) {
-    // Маркираме първо — така повторно изпълнение не праща дубликат
+    // Маркираме първо — така повторно натискане не праща дубликат
     const { data: claimed } = await db()
       .from("bookings")
       .update({ reminder_sent_at: new Date().toISOString() })
@@ -53,5 +47,5 @@ export async function GET(req: NextRequest) {
     });
     sent++;
   }
-  return NextResponse.json({ sent, cleaned });
+  return { sent, cleaned };
 }

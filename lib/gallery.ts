@@ -8,6 +8,7 @@ export const BEFORE_AFTER = {
 } as const;
 
 export const GALLERY: GalleryPhoto[] = [
+  { src: "/gallery/yorkie-before-after-tie.jpg", w: 1206, h: 1206, alt: "Йоркширски териер преди и след груминг, със зелена вратовръзка на точки" },
   { src: "/gallery/89620BD0-65FA-4810-8642-91979DC5BDFE.jpg", w: 1206, h: 843, alt: "Малтийска болонка преди и след груминг" },
   { src: "/gallery/008C6561-1DD1-43C9-A42A-0FE4906C38A4.jpg", w: 1206, h: 1685, alt: "Кафяв пудел след груминг, с папийонка за Хелоуин" },
   { src: "/gallery/IMG_5336.jpg", w: 1206, h: 1025, alt: "Пудел преди и след подстригване" },
@@ -19,3 +20,12 @@ export const GALLERY: GalleryPhoto[] = [
   { src: "/gallery/IMG_5335.jpg", w: 1206, h: 1078, alt: "Йоркширски териер преди и след, с къса козина" },
   { src: "/gallery/IMG_5342.jpg", w: 1206, h: 915, alt: "Йоркширски териер преди и след, с червена панделка" },
 ];
+
+/** Снимка по име на файла — за места, които сочат конкретна снимка (не зависят от реда в GALLERY). */
+export function galleryPhoto(file: string): GalleryPhoto {
+  const p = GALLERY.find((x) => x.src.endsWith(`/${file}`));
+  if (!p) throw new Error(`Няма снимка ${file} в GALLERY`);
+  return p;
+}
+export const HALLOWEEN_PHOTO = galleryPhoto("008C6561-1DD1-43C9-A42A-0FE4906C38A4.jpg");
+export const CAT_PHOTO = galleryPhoto("cat.jpg");

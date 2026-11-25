@@ -6,11 +6,11 @@ import { PET_SIZES, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SHARED_SIZE, SIZE_HINT,
 import { serviceDeposit } from "@/lib/booking/deposit";
 import { ButtonLink, buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/format";
-import { BEFORE_AFTER, GALLERY } from "@/lib/gallery";
+import { BEFORE_AFTER, CAT_PHOTO, HALLOWEEN_PHOTO } from "@/lib/gallery";
 import Image from "next/image";
 import Link from "next/link";
 
-const GALLERY_TEASER = [BEFORE_AFTER.before, GALLERY[1], GALLERY[4]];
+const GALLERY_TEASER = [BEFORE_AFTER.before, HALLOWEEN_PHOTO, CAT_PHOTO];
 
 export const dynamic = "force-dynamic";
 
