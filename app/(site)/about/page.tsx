@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { getSettings } from "@/lib/settings";
 import { ButtonLink } from "@/components/ui/button";
-import { PopOut } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -17,6 +17,13 @@ const FACTS = [
   ["100%", "изпробвано", "Всеки продукт в магазина първо е минал през салона."],
 ] as const;
 
+const STORY = [
+  "Казвам се Стефани Бучакова и вече повече от 5 години професионалният груминг е моя страст и призвание.",
+  "През годините, прекарани сред безброй пухкави муцунки, разбрах, че грижата за животните е много повече от професия – тя е любов, търпение, отдаденост и внимание към всеки детайл.",
+  "Именно този опит ме вдъхнови да направя следващата крачка – да създам собствена професионална козметика за домашни любимци. Така се роди CULTE – бранд, зад който стоят моята любов, страст, опит и желание да предложа най-качествената домашна грижа.",
+  "Днес Animal House Grooming Salon и Culte са двете страни на една обща идея – да даваме най-доброто на онези, които ни даряват с безусловна любов всеки ден.",
+] as const;
+
 const STEPS = [
   ["Запознаваме се", "Питаме за навиците, страховете и здравето на кучето."],
   ["Подбираме", "Шампоан и балсам според козината и чувствителността на кожата."],
@@ -29,17 +36,32 @@ export default async function AboutPage() {
   return (
     <div className="pt-12">
       {/* Начало */}
-      <section className="container-page grid items-center gap-12 md:grid-cols-12 md:gap-8">
-        <div className="md:col-span-7">
+      <section className="container-page grid items-start gap-12 md:grid-cols-12 md:gap-8">
+        <div className="md:col-span-6">
           <p className="animate-rise text-[11px] font-medium tracking-[0.32em] text-terracotta uppercase">За нас</p>
-          <h1 className="mt-4 animate-rise text-[clamp(2.6rem,6vw,4.6rem)] text-balance [animation-delay:80ms]">{s.slogan}</h1>
-          <p className="mt-6 max-w-[40ch] animate-rise text-[17px] leading-8 text-espresso-soft [animation-delay:160ms]">
-            Culte започна от едно просто правило:{" "}
-            <span className="font-serif text-[1.2em] text-espresso italic">кучето в салона трябва да се чувства спокойно.</span>
+          <h1 className="mt-4 animate-rise text-[clamp(2.4rem,4.2vw,3.8rem)] text-balance [animation-delay:80ms]">{s.slogan}</h1>
+          <div className="mt-8 max-w-[52ch] animate-rise space-y-5 text-[16px] leading-7 text-espresso-soft [animation-delay:160ms]">
+            {STORY.map((t) => (
+              <p key={t.slice(0, 24)}>{t}</p>
+            ))}
+            <p className="font-serif text-[1.35em] leading-snug text-espresso italic">Защото те не са просто домашни любимци. Те са семейство!</p>
+          </div>
+          <p className="mt-8 animate-rise [animation-delay:220ms]">
+            <span className="block text-[11px] font-medium tracking-[0.28em] text-terracotta uppercase">С любов,</span>
+            <span className="mt-2 block font-serif text-[1.8rem] leading-none italic">Стефани Бучакова</span>
           </p>
         </div>
-        <div className="group animate-rise [animation-delay:200ms] md:col-span-4 md:col-start-9">
-          <PopOut dog="puppy" tone="sand-deep" priority className="mx-auto max-w-[300px] md:max-w-none" sizes="(min-width: 768px) 380px, 300px" />
+        <div className="animate-rise [animation-delay:200ms] md:sticky md:top-28 md:col-span-5 md:col-start-8">
+          <div className="relative mx-auto aspect-[1206/1305] max-w-[440px] overflow-hidden rounded-lg bg-sand md:max-w-none">
+            <Image
+              src="/za-nas.png"
+              alt="Стефани Бучакова с черен той пудел със златна папийонка"
+              fill
+              priority
+              sizes="(min-width: 768px) 42vw, 440px"
+              className="object-cover"
+            />
+          </div>
         </div>
       </section>
 

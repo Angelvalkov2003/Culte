@@ -24,7 +24,7 @@ export default function GalleryPage() {
             Преди и след
           </h1>
           <p className="mt-6 max-w-[40ch] animate-rise text-[16px] leading-7 text-espresso-soft [animation-delay:160ms]">
-            Плъзнете дръжката по снимката, за да видите промяната — от рошаво кученце до готов пудел след салона.
+            Плъзни, за да видиш промяната.
           </p>
           <div className="mt-8 flex animate-rise flex-wrap items-center gap-x-6 gap-y-3 [animation-delay:240ms]">
             <ButtonLink href="/booking" size="lg">

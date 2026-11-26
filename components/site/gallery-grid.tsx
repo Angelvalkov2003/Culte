@@ -107,7 +107,7 @@ function Lightbox({
       }}
     >
       <style>{KEYFRAMES}</style>
-      <div className="flex items-center justify-between px-4 py-3 text-cream sm:px-6">
+      <div className="flex items-center justify-between px-4 py-1 text-cream sm:px-6">
         <span className="text-sm tabular-nums text-cream/70">
           {index + 1} / {photos.length}
         </span>
@@ -124,7 +124,8 @@ function Lightbox({
         </button>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 sm:px-20">
+      {/* --chrome = височината на горната и долната лента; снимката заема всичко останало (и се уголемява над реалния си размер). */}
+      <div className="relative flex min-h-0 flex-1 items-center justify-center [--chrome:7rem] [--padx:0px] sm:[--chrome:5.75rem] sm:[--padx:2rem]">
         {/* Реалните пропорции: елементът е колкото видимата снимка, така празното място около нея затваря. */}
         <Image
           key={p.src}
@@ -133,13 +134,18 @@ function Lightbox({
           width={p.w}
           height={p.h}
           sizes="100vw"
-          className="h-auto max-h-[calc(100svh-8.5rem)] w-auto max-w-full animate-[lightbox-img_350ms_cubic-bezier(0.2,0.7,0.2,1)_both] rounded-sm object-contain"
+          style={{ width: `min(calc(100vw - var(--padx)), calc((100svh - var(--chrome)) * ${p.w / p.h}))` }}
+          className="h-auto max-w-none animate-[lightbox-img_350ms_cubic-bezier(0.2,0.7,0.2,1)_both] sm:rounded-sm"
         />
-        <NavBtn dir={-1} onGo={onGo} />
-        <NavBtn dir={1} onGo={onGo} />
+        <NavBtn dir={-1} onGo={onGo} place="side" />
+        <NavBtn dir={1} onGo={onGo} place="side" />
       </div>
 
-      <p className="px-4 py-4 text-center text-sm text-cream/70">{p.alt}</p>
+      <div className="flex items-center gap-3 px-2 py-2 sm:justify-center sm:px-4 sm:py-3">
+        <NavBtn dir={-1} onGo={onGo} place="bar" />
+        <p className="line-clamp-2 flex-1 text-center text-sm leading-tight text-cream/70 sm:flex-none">{p.alt}</p>
+        <NavBtn dir={1} onGo={onGo} place="bar" />
+      </div>
     </div>,
     document.body,
   );
@@ -147,15 +153,18 @@ function Lightbox({
 
 const KEYFRAMES = `@keyframes lightbox-in{from{opacity:0}}@keyframes lightbox-img{from{opacity:0;transform:scale(.97)}}`;
 
-function NavBtn({ dir, onGo }: { dir: 1 | -1; onGo: (d: number) => void }) {
+/** `side` — върху снимката отстрани (от sm нагоре); `bar` — в долната лента (само на телефон, за да не покриват снимката). */
+function NavBtn({ dir, onGo, place }: { dir: 1 | -1; onGo: (d: number) => void; place: "side" | "bar" }) {
   return (
     <button
       type="button"
       onClick={() => onGo(dir)}
       aria-label={dir < 0 ? "Предишна снимка" : "Следваща снимка"}
       className={cn(
-        "absolute top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-cream/90 text-espresso shadow-lg transition-transform hover:scale-105 sm:size-12",
-        dir < 0 ? "left-2 sm:left-5" : "right-2 sm:right-5",
+        "size-11 shrink-0 place-items-center rounded-full bg-cream/90 text-espresso shadow-lg transition-transform hover:scale-105",
+        place === "side"
+          ? cn("absolute top-1/2 hidden -translate-y-1/2 sm:grid sm:size-12", dir < 0 ? "left-5" : "right-5")
+          : "grid sm:hidden",
       )}
     >
       <svg viewBox="0 0 20 20" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
