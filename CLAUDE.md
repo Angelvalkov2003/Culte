@@ -15,7 +15,7 @@ Next.js 16 (App Router, TS, Server Actions) · Tailwind 4 · Supabase · Stripe 
 - `lib/booking/` — свободни часове, създаване на резервация; `lib/shop/` — количка (cookie `culte_cart`), поръчки
 - `lib/shipping/` — `speedy.ts` (API v1: sites/offices/calculate/shipment/print/track; тегло SPEEDY_WEIGHT_KG; офиси САМО по siteId, OFFICE/APT филтър локално), `boxnow.ts` (отделно, OAuth токен, публичен JSON с автомати, фиксирана цена BOXNOW_PRICE), `resolve.ts` (сървърно преизчисляване на доставката + проверка на тотала ±0.05), `speedy-orders.ts` (товарителница/синхронизация). Товарителници и синхронизация на статусите САМО от бутони в админа (без cron)
 - Услуги: групи `package/single/care`, `includes`, `deposit` на услуга (диапазон → 50% закръглено до 10 €) — `lib/booking/deposit.ts`
-- Домейн: `https://culte.eu`, хардкоднат в `lib/site-url.ts` (`SITE_URL`); Stripe success/cancel ползват `requestOrigin()`
+- Домейн: `lib/site-url.ts` (`SITE_URL`) = `NEXT_PUBLIC_SITE_URL` или по подразбиране `https://culte.eu` (докато домейнът не е вързан, във Vercel е `https://culte-beta.vercel.app`; смяна → redeploy); Stripe success/cancel ползват `requestOrigin()`
 - Без cron (безплатен Vercel): напомняния за утре + `cleanup_stale_data()` + изтекли резервации = бутон на таблото в админа (`lib/maintenance.tsx`). BoxNow безплатна до 31.01.2027 (`lib/shipping/boxnow-promo.ts`), банерът и цената 0 изчезват сами по дата
 - `emails/` — React Email шаблони; `lib/email.ts` праща през Resend
 - Правно: `/withdrawal` (функция за отказ, табл. `withdrawal_requests`), данни за търговеца в `settings.company_*` → `companyInfo()`; GPSR полета `products.manufacturer/safety_info`; `cleanup_stale_data()` (GDPR)
