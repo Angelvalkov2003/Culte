@@ -40,7 +40,7 @@ export default async function WithdrawalsPage() {
               </div>
               <ActionForm action={updateWithdrawal} className="mt-3 flex flex-wrap items-center gap-2">
                 <input type="hidden" name="id" value={w.id} />
-                <Select name="status" defaultValue={w.status} className="max-w-44" aria-label="Статус">
+                <Select key={w.status} name="status" defaultValue={w.status} className="max-w-44" aria-label="Статус">
                   <option value="received">Получен</option>
                   <option value="processed">Обработен</option>
                   <option value="rejected">Отхвърлен</option>

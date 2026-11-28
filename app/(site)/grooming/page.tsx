@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getActiveServices } from "@/lib/booking/services";
-import { getBusinessHours, getSettings, groupHours, listBG } from "@/lib/settings";
+import { getBusinessHours, getSettings, groupHours } from "@/lib/settings";
 import { formatDuration, formatEUR, formatRange } from "@/lib/format";
 import { PET_SIZES, SERVICE_GROUPS, SERVICE_GROUP_LABEL, SHARED_SIZE, SIZE_HINT, SIZE_LABEL, type Service } from "@/lib/types";
 import { serviceDeposit } from "@/lib/booking/deposit";
@@ -43,9 +43,6 @@ export default async function GroomingPage() {
             Красотата е в детайла.
             <span className="mt-2 block font-normal text-terracotta italic">Грижата — в отношението.</span>
           </h1>
-          <p className="mt-6 max-w-[38ch] animate-rise text-[17px] leading-8 text-espresso-soft [animation-delay:160ms]">
-            Всяко куче е различно. Затова започваме не с ножицата, а с внимание.
-          </p>
           <div className="mt-8 flex animate-rise flex-wrap items-center gap-x-6 gap-y-3 [animation-delay:240ms]">
             <ButtonLink href="/booking" size="lg">
               Запази час
@@ -79,27 +76,8 @@ export default async function GroomingPage() {
         </div>
       </header>
 
-      {/* Три принципа — кратко, вместо дълъг текст */}
-      <ul data-reveal className="mt-24 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
-        {(
-          [
-            ["Внимание", "От първото разресване до последния детайл."],
-            ["Разбиране", "Всяка стъпка — според козината, кожата и характера."],
-            ["Висок клас", `Козметика от ${listBG(s.cosmetics)}.`],
-          ] as const
-        ).map(([title, text], i) => (
-          <li key={title} className="flex items-baseline gap-4 bg-cream p-5 sm:block sm:p-8">
-            <span className="font-serif text-lg text-gold lining-nums tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-            <div>
-              <h2 className="text-[1.6rem] sm:mt-2 sm:text-[1.9rem]">{title}</h2>
-              <p className="mt-1 text-[15px] leading-6 text-espresso-soft sm:mt-2">{text}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
-
       {/* Работно време и адрес — една лента */}
-      <div data-reveal className="mt-4 flex flex-col gap-5 rounded-lg bg-sand p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
+      <div data-reveal className="mt-24 flex flex-col gap-5 rounded-lg bg-sand p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
         <dl className="flex flex-wrap gap-x-10 gap-y-3 text-[15px]">
           {groupHours(hours).map((h) => (
             <div key={h.label} className="flex items-baseline gap-3">

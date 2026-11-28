@@ -53,8 +53,13 @@ export async function writeCart(lines: CartLine[]) {
   });
 }
 
+/**
+ * Броят в хедъра — като количката: без продукти, които вече ги няма (изтрити, скрити, нова база)
+ * и с количество, ограничено от наличността. Празна бисквитка = без заявка към базата.
+ */
 export async function cartCount(): Promise<number> {
-  return (await readCart()).reduce((s, l) => s + l.q, 0);
+  if (!(await readCart()).length) return 0;
+  return (await getCart()).count;
 }
 
 /** Количката с актуални цени и наличности от базата. */

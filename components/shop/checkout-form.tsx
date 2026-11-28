@@ -36,6 +36,27 @@ export function CheckoutForm({
   const total = round2(subtotal + (shipping ?? 0));
   const shippingReady = Boolean(ship.selection) && shipping != null && !ship.loading && !ship.error;
 
+  // Какво още липсва — показва се над бутона (сървърът пак валидира всичко)
+  const missing: string[] = [];
+  if (f.name.trim().length < 2) missing.push("име и фамилия");
+  if (!/^\S+@\S+\.\S+$/.test(f.email.trim())) missing.push("имейл");
+  if (f.phone.replace(/\D/g, "").length < 7) missing.push("телефон");
+  if (!ship.selection && !ship.error) missing.push(ship.missing ?? "начин на доставка");
+  if (f.invoice) {
+    if (f.invoiceCompany.trim().length < 2) missing.push("фирма за фактурата");
+    if (!/^(\d{9}|\d{10}|\d{13})$/.test(f.invoiceEik.trim())) missing.push("ЕИК / ЕГН");
+    if (f.invoiceAddress.trim().length < 5) missing.push("адрес по регистрация");
+  }
+  if (!f.terms) missing.push("съгласие с общите условия");
+  const hint = ship.error
+    ? `Доставка: ${ship.error}`
+    : missing.length
+      ? `За да поръчате, попълнете: ${missing.join(", ")}.`
+      : ship.selection && ship.loading
+        ? "Изчисляваме цената на доставката…"
+        : null;
+  const canSubmit = shippingReady && missing.length === 0;
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -180,7 +201,12 @@ export function CheckoutForm({
           <p className="mt-6 text-sm text-espresso-soft">
             {payment === "stripe" ? `След поръчката ще платите ${formatEUR(total)} с карта през Stripe.` : `Ще платите ${formatEUR(total)} на куриера при получаване.`}
           </p>
-          <Button type="submit" size="lg" className="mt-3 w-full" disabled={pending || !shippingReady}>
+          {hint && !pending && (
+            <p className="mt-3 rounded-md border border-line bg-cream/70 p-3 text-sm text-espresso-soft" aria-live="polite">
+              {hint}
+            </p>
+          )}
+          <Button type="submit" size="lg" className="mt-3 w-full" disabled={pending || !canSubmit}>
             {pending ? "Обработваме…" : "Поръчка с задължение за плащане"}
           </Button>
         </div>

@@ -72,7 +72,9 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <ActionForm action={updateOrderStatus} className="space-y-4">
             <input type="hidden" name="id" value={o.id} />
             <Field label="Статус" htmlFor="status" hint="„Отказана“ връща бройките. „Изпратена“ праща имейл на клиента.">
-              <Select id="status" name="status" defaultValue={o.status}>
+              {/* key: React 19 нулира формата след action, а <select defaultValue> не обновява началната си стойност
+                  при нови props — без key се връща на статуса от първото зареждане. Нов статус = нов select. */}
+              <Select key={o.status} id="status" name="status" defaultValue={o.status}>
                 {STATUSES.map((s) => <option key={s} value={s}>{ORDER_STATUS_LABEL[s]}</option>)}
               </Select>
             </Field>

@@ -17,14 +17,14 @@ function Fields({ m }: { m?: ShippingMethod }) {
         <Input id={`n-${p}`} name="name" defaultValue={m?.name} required />
       </Field>
       <Field label="Тип" htmlFor={`d-${p}`}>
-        <Select id={`d-${p}`} name="delivery" defaultValue={m?.delivery ?? "address"}>
+        <Select key={m?.delivery} id={`d-${p}`} name="delivery" defaultValue={m?.delivery ?? "address"}>
           <option value="address">До адрес</option>
           <option value="office">До офис</option>
           <option value="pickup">Вземане от салона</option>
         </Select>
       </Field>
       <Field label="Провайдър" htmlFor={`p-${p}`} hint="Еконт/Спиди — след интеграция">
-        <Select id={`p-${p}`} name="provider" defaultValue={m?.provider ?? "manual"}>
+        <Select key={m?.provider} id={`p-${p}`} name="provider" defaultValue={m?.provider ?? "manual"}>
           {Object.values(PROVIDERS).map((pr) => <option key={pr.id} value={pr.id}>{pr.label}</option>)}
         </Select>
       </Field>

@@ -68,13 +68,21 @@ export function BoxnowPicker({
       )}
 
       {mode === "map" && partnerId ? (
-        <iframe
-          title="Избор на BoxNow автомат"
-          src={`https://widget-v5.boxnow.bg/iframe.html?partnerId=${encodeURIComponent(partnerId)}&gps=yes&autoselect=no&autoclose=no`}
-          allow="geolocation"
-          loading="lazy"
-          className="h-[520px] w-full rounded-md border border-line"
-        />
+        <>
+          {!value && <p className="text-sm text-espresso-soft">Натиснете автомат на картата или в списъка.</p>}
+          {/*
+            autoselect=yes е задължително: при autoselect=no widget-ът показва бутон „Избери“, който в режим iframe
+            НЕ праща postMessage (праща само в режим popup), и изборът никога не стига до нас.
+            С autoselect=yes автоматът се праща още при клик върху него.
+          */}
+          <iframe
+            title="Избор на BoxNow автомат"
+            src={`https://widget-v5.boxnow.bg/iframe.html?partnerId=${encodeURIComponent(partnerId)}&gps=yes&autoselect=yes&autoclose=no`}
+            allow="geolocation"
+            loading="lazy"
+            className="h-[520px] w-full rounded-md border border-line"
+          />
+        </>
       ) : (
         <LockerSearch onPick={onChange} />
       )}

@@ -40,7 +40,7 @@ export default async function BookingDetail({ params }: { params: Promise<{ id: 
               <Field label="Начало" htmlFor="time"><Input id="time" name="time" type="time" step={300} defaultValue={fmt(b.start_at, "HH:mm")} /></Field>
               <Field label="Минути" htmlFor="duration"><Input id="duration" name="duration" type="number" min={5} step={5} defaultValue={minutes} /></Field>
               <Field label="Статус" htmlFor="status">
-                <Select id="status" name="status" defaultValue={b.status === "cancelled" ? "expired" : b.status} disabled={b.status === "cancelled"}>
+                <Select key={b.status} id="status" name="status" defaultValue={b.status === "cancelled" ? "expired" : b.status} disabled={b.status === "cancelled"}>
                   <option value="confirmed">Потвърдена</option>
                   <option value="completed">Изпълнена</option>
                   <option value="pending_payment">Чака плащане</option>

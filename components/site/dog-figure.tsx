@@ -9,6 +9,7 @@ export const DOGS = {
   blue: { src: "/dogs/blue-towel.png", w: 347, h: 344, alt: "Куче, завито със синя хавлия" },
   yorkieScissors: { src: "/dogs/yorkie-cut.png", w: 311, h: 373, alt: "Йоркширски териер по време на подстригване с ножица и гребен" },
   shihtzu: { src: "/dogs/shihtzu-brush.png", w: 278, h: 201, alt: "Ши-тцу, което се разресва и подстригва" },
+  yorkieSpa: { src: "/dogs/yorke.png", w: 1287, h: 1222, alt: "Йоркширски териер с ролки в козината и розов халат, до сгънати хавлии" },
   yorkieSalon: { src: "/dogs/yorkie-cosmetics.png", w: 1344, h: 1049, alt: "Йоркширски териер сред четки и козметика за животни" },
   poodleGold: { src: "/dog9.png", w: 1086, h: 1448, alt: "Черен пудел след подстригване, със златна папийонка" },
   poodleViolet: { src: "/dog8.png", w: 1086, h: 1448, alt: "Черен пудел с лилава папийонка с пайети" },

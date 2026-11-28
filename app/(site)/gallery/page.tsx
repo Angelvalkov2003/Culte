@@ -84,10 +84,6 @@ export default function GalleryPage() {
             Следващата снимка може да е на{" "}
             <span className="font-normal text-gold italic">вашето приятелче</span>
           </h2>
-          <p className="mx-auto mt-5 max-w-[40ch] text-[15px] leading-7 text-cream/70 md:mx-0">
-            Запазете час онлайн за минута. Ние ще се погрижим за банята, подстригването и всеки детайл — а то ще си тръгне
-            спокойно и красиво.
-          </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 md:justify-start">
             <ButtonLink href="/booking" size="lg" variant="light">
               Запази час

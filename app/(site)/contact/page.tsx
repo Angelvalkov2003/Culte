@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getBusinessHours, getSettings, groupHours } from "@/lib/settings";
 import { MapEmbed } from "@/components/site/map-embed";
-import { PopOut } from "@/components/site/dog-figure";
+import Image from "next/image";
+import { DOGS } from "@/components/site/dog-figure";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -59,7 +60,18 @@ export default async function ContactPage() {
               <li><a href={s.tiktok_url} target="_blank" rel="noopener noreferrer" className="link-underline">TikTok</a></li>
             </ul>
           </div>
-          <PopOut dog="foam" tone="sand" className="max-w-[240px]" sizes="240px" />
+          {/* Свободно върху фона, без блок и рамка — само мека сянка отдолу, все едно стои на пода */}
+          <figure className="relative mt-2 w-full max-w-[300px]">
+            <span aria-hidden className="absolute inset-x-[6%] -bottom-1 h-5 rounded-[50%] bg-espresso/15 blur-md" />
+            <Image
+              src={DOGS.yorkieSpa.src}
+              alt={DOGS.yorkieSpa.alt}
+              width={DOGS.yorkieSpa.w}
+              height={DOGS.yorkieSpa.h}
+              sizes="300px"
+              className="relative h-auto w-full select-none"
+            />
+          </figure>
         </div>
         <div className="md:col-span-8">
           <MapEmbed query={mapQuery(s.address)} address={s.address} href={directionsUrl(s.address)} />

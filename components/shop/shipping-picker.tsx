@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Field, Input, inputClass } from "@/components/ui/field";
 import { BoxnowPicker, type BoxnowLocker } from "@/components/shop/boxnow-picker";
 import { cn, formatEUR } from "@/lib/format";
@@ -19,9 +19,40 @@ export interface ShippingState {
   deadline: string | null;
   loading: boolean;
   error: string | null;
+  /** Какво още липсва за избраната доставка (за подсказката над бутона). */
+  missing?: string | null;
 }
 
-type Tab = "speedy_office" | "speedy_apt" | "speedy_address" | "boxnow" | `manual:${string}`;
+type SpeedyKind = "speedy_office" | "speedy_apt" | "speedy_address";
+type Tab = SpeedyKind | "boxnow" | `manual:${string}`;
+type CarrierId = "speedy" | "boxnow" | `manual:${string}`;
+
+interface Logo {
+  src: string;
+  w: number;
+  h: number;
+  className?: string;
+}
+interface Carrier {
+  id: CarrierId;
+  label: string;
+  hint: string;
+  logo: Logo | null;
+}
+
+/** Логата в public/brands (официалните на Speedy и BoxNow; Animal House за вземане от салона). */
+const LOGOS = {
+  // Височините са подбрани на око: PNG-то на Speedy има празно поле около надписа, BoxNow е плътен зелен квадрат.
+  speedy: { src: "/brands/speedy.png", w: 115, h: 49, className: "h-10 sm:h-11" },
+  boxnow: { src: "/brands/boxnow.svg", w: 139, h: 102, className: "h-9 rounded-[3px] sm:h-10" },
+  salon: { src: "/brands/animal-house.png", w: 537, h: 465, className: "h-11 sm:h-12" },
+} satisfies Record<string, Logo>;
+
+const SPEEDY_KINDS: { id: SpeedyKind; label: string; icon: string }[] = [
+  { id: "speedy_office", label: "До офис", icon: "M3 8.5L10 4l7 4.5M4.5 8v8h11V8M8 16v-4h4v4" },
+  { id: "speedy_apt", label: "До автомат", icon: "M4 3h12v14H4zM4 8h12M4 12.5h12M10 3v14" },
+  { id: "speedy_address", label: "До адрес", icon: "M10 17s5.5-4.8 5.5-9a5.5 5.5 0 10-11 0c0 4.2 5.5 9 5.5 9zM10 10a2 2 0 100-4 2 2 0 000 4z" },
+];
 
 interface Site {
   id: number;
@@ -199,20 +230,22 @@ export function ShippingPicker({
   errors: Record<string, string>;
   onChange: (s: ShippingState) => void;
 }) {
-  const tabs = useMemo(() => {
-    const t: { id: Tab; label: string; hint: string }[] = [];
-    if (speedyEnabled) {
-      t.push({ id: "speedy_office", label: "Speedy офис", hint: "Вземате от офис на Speedy" });
-      t.push({ id: "speedy_apt", label: "Speedy автомат", hint: "Вземате от автомат на Speedy" });
-      t.push({ id: "speedy_address", label: "Speedy адрес", hint: "Куриер до вашия адрес" });
-    }
+  // Горно ниво: превозвач (Speedy / BoxNow / ръчни методи). Speedy има втори избор — офис, автомат или адрес.
+  const carriers = useMemo(() => {
+    const c: Carrier[] = [];
+    if (speedyEnabled) c.push({ id: "speedy", label: "Speedy", hint: "Офис, автомат или до адрес", logo: LOGOS.speedy });
     if (boxnow.enabled)
-      t.push({ id: "boxnow", label: "BoxNow", hint: boxnow.price === 0 ? "Автомат BoxNow · безплатна доставка" : "Автомат BoxNow, денонощно" });
-    for (const m of manualMethods) t.push({ id: `manual:${m.id}`, label: m.name, hint: m.description });
-    return t;
+      c.push({ id: "boxnow", label: "BoxNow", hint: boxnow.price === 0 ? "Автомат · безплатна доставка" : "Автомат, денонощно", logo: LOGOS.boxnow });
+    for (const m of manualMethods)
+      c.push({ id: `manual:${m.id}`, label: m.name, hint: m.description, logo: m.delivery === "pickup" ? LOGOS.salon : null });
+    return c;
   }, [speedyEnabled, boxnow.enabled, boxnow.price, manualMethods]);
 
-  const [tab, setTab] = useState<Tab | null>(tabs[0]?.id ?? null);
+  const [tab, setTab] = useState<Tab | null>(
+    carriers[0] ? (carriers[0].id === "speedy" ? "speedy_office" : (carriers[0].id as Tab)) : null,
+  );
+  const carrier: CarrierId | null = !tab ? null : tab.startsWith("speedy") ? "speedy" : (tab as CarrierId);
+  const lastSpeedy = useRef<SpeedyKind>("speedy_office");
   const [site, setSite] = useState<Site | null>(null);
   const [office, setOffice] = useState<Office | null>(null);
   const [addressLine, setAddressLine] = useState("");
@@ -267,8 +300,24 @@ export function ShippingPicker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [speedyKey]);
 
+  const missing: string | null = selection
+    ? null
+    : !tab
+      ? "начин на доставка"
+      : tab === "boxnow"
+        ? "автомат BoxNow"
+        : tab.startsWith("manual:")
+          ? null
+          : !site
+            ? "населено място за доставка"
+            : tab === "speedy_address"
+              ? "адрес за доставка"
+              : tab === "speedy_apt"
+                ? "автомат Speedy"
+                : "офис на Speedy";
+
   const state: ShippingState = useMemo(() => {
-    if (!selection) return { selection: null, price: null, deadline: null, loading: false, error: null };
+    if (!selection) return { selection: null, price: null, deadline: null, loading: false, error: null, missing };
     if (selection.method === "manual") {
       const m = manualMethods.find((x) => x.id === selection.methodId);
       return { selection, price: m ? shippingQuote(m, subtotal) : null, deadline: null, loading: false, error: null };
@@ -282,7 +331,7 @@ export function ShippingPicker({
       loading: !fresh || quote.loading,
       error: fresh ? quote.error : null,
     };
-  }, [selection, manualMethods, subtotal, boxnow.price, quote, speedyKey]);
+  }, [selection, manualMethods, subtotal, boxnow.price, quote, speedyKey, missing]);
 
   const onChangeRef = useRef(onChange);
   useEffect(() => {
@@ -292,35 +341,101 @@ export function ShippingPicker({
     onChangeRef.current(state);
   }, [state]);
 
-  if (!tabs.length) return <p className="mt-3 text-sm text-danger">В момента няма активни методи на доставка.</p>;
+  if (!carriers.length) return <p className="mt-3 text-sm text-danger">В момента няма активни методи на доставка.</p>;
+
+  const pick = (next: Tab) => {
+    if (next === tab) return;
+    if (next.startsWith("speedy")) lastSpeedy.current = next as SpeedyKind;
+    setTab(next);
+    setOffice(null);
+  };
+
+  const speedyKinds = (
+    <div
+      role="radiogroup"
+      aria-label="Къде да получите пратката от Speedy"
+      className="grid animate-[kinds-in_250ms_ease-out_both] grid-cols-3 gap-1 rounded-lg bg-sand p-1 sm:order-last sm:col-span-full"
+    >
+      <style>{`@keyframes kinds-in{from{opacity:0;transform:translateY(-4px)}}`}</style>
+      {SPEEDY_KINDS.map((k) => {
+        const on = tab === k.id;
+        return (
+          <label
+            key={k.id}
+            className={cn(
+              "flex cursor-pointer flex-col items-center gap-1 rounded-md px-2 py-2.5 text-center text-sm transition-colors duration-200 sm:flex-row sm:justify-center sm:gap-2",
+              "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-terracotta/40",
+              on ? "bg-cream font-medium text-espresso shadow-[0_2px_8px_rgba(46,35,28,0.10)]" : "text-espresso-soft hover:text-espresso",
+            )}
+          >
+            <input type="radio" name="speedy-kind" className="sr-only" checked={on} onChange={() => pick(k.id)} />
+            <svg viewBox="0 0 20 20" className={cn("size-[18px] shrink-0", on && "text-terracotta")} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d={k.icon} />
+            </svg>
+            {k.label}
+          </label>
+        );
+      })}
+    </div>
+  );
 
   return (
     <div className="mt-4 space-y-5">
-      <div role="radiogroup" aria-label="Начин на доставка" className="grid gap-2 sm:grid-cols-2">
-        {tabs.map((t) => (
-          <label
-            key={t.id}
-            className={cn(
-              "flex cursor-pointer items-start gap-3 rounded-md border p-3.5",
-              tab === t.id ? "border-terracotta bg-sand/60" : "border-line hover:border-clay",
-            )}
-          >
-            <input
-              type="radio"
-              name="shipping-method"
-              className="mt-1 size-4 accent-terracotta"
-              checked={tab === t.id}
-              onChange={() => {
-                setTab(t.id);
-                setOffice(null);
-              }}
-            />
-            <span>
-              <span className="block font-medium">{t.label}</span>
-              {t.hint && <span className="block text-sm text-espresso-soft">{t.hint}</span>}
-            </span>
-          </label>
-        ))}
+      <div
+        role="group"
+        aria-label="Начин на доставка"
+        className={cn("grid gap-2.5", carriers.length >= 3 ? "sm:grid-cols-3" : carriers.length === 2 && "sm:grid-cols-2")}
+      >
+        {carriers.map((c) => {
+          const on = carrier === c.id;
+          const card = (
+            <label
+              className={cn(
+                "group relative flex cursor-pointer items-center gap-4 rounded-lg border bg-cream p-4 transition-[border-color,background-color,box-shadow] duration-300 sm:flex-col sm:items-start sm:gap-3",
+                "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-terracotta/40",
+                on ? "border-terracotta bg-sand/60 shadow-[0_6px_18px_rgba(46,35,28,0.08)]" : "border-line hover:border-clay",
+              )}
+            >
+              <input
+                type="radio"
+                name="shipping-carrier"
+                className="sr-only"
+                checked={on}
+                onChange={() => pick(c.id === "speedy" ? lastSpeedy.current : (c.id as Tab))}
+              />
+              <span className="flex h-11 w-20 shrink-0 items-center sm:h-12 sm:w-auto">
+                {c.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- малки логота (PNG/SVG), без нужда от оптимизация
+                  <img src={c.logo.src} alt={`${c.label} лого`} width={c.logo.w} height={c.logo.h} className={cn("block w-auto max-w-full object-contain", c.logo.className)} />
+                ) : (
+                  <span className="font-serif text-xl">{c.label}</span>
+                )}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-medium">{c.label}</span>
+                {c.hint && <span className="mt-0.5 block text-sm leading-5 text-espresso-soft">{c.hint}</span>}
+              </span>
+              <span
+                aria-hidden
+                className={cn(
+                  "grid size-5 shrink-0 place-items-center rounded-full border transition-colors sm:absolute sm:top-3.5 sm:right-3.5",
+                  on ? "border-terracotta bg-terracotta text-cream" : "border-clay",
+                )}
+              >
+                <svg viewBox="0 0 12 12" className={cn("size-3 transition-opacity", on ? "opacity-100" : "opacity-0")} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2.5 6.2l2.3 2.3 4.7-4.9" />
+                </svg>
+              </span>
+            </label>
+          );
+          // Изборът за Speedy е веднага след картата му: на телефон е точно под нея, от sm нагоре — на цял ред под картите.
+          return (
+            <Fragment key={c.id}>
+              {card}
+              {c.id === "speedy" && on && speedyKinds}
+            </Fragment>
+          );
+        })}
       </div>
 
       {tab && (tab === "speedy_office" || tab === "speedy_apt" || tab === "speedy_address") && (
